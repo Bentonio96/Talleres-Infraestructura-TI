@@ -51,7 +51,7 @@ alineado con las mismas 10 diapositivas.
 | Archivo | Descripción |
 |---------|-------------|
 | `5b - Presentacion interactiva - Taller 1.html` | Versión interactiva de la presentación, 10 diapositivas (se abre en el navegador). |
-| `5c - Guion de la presentacion - Taller 1.html` | Guion slide por slide e integrante: 2 diapositivas y 2 minutos por persona, 10:00 en total, con preguntas probables del docente. |
+| `5c - Guion de la presentacion - Taller 1.pdf` | Guion slide por slide e integrante (15 páginas): 2 diapositivas y 2 minutos por persona, 10:00 en total, con la pregunta probable del docente en cada diapositiva, banco de preguntas y recomendaciones de exposición. |
 
 ### Reparto de la exposición
 
