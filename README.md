@@ -44,13 +44,24 @@ presentación comparten el mismo nombre base, tal como se solicita.
 
 ### Material complementario
 
-Apoyo interno del grupo. **No forma parte del `.zip` de la entrega** y
-corresponde a la versión extendida previa de la presentación.
+Apoyo interno del grupo para ensayar. **No forma parte del `.zip` de la
+entrega** (el docente no lista HTML entre los formatos aceptados), pero está
+alineado con las mismas 10 diapositivas.
 
 | Archivo | Descripción |
 |---------|-------------|
-| `5b - Presentacion interactiva - Taller 1.html` | Versión interactiva de la presentación (se abre en el navegador). |
-| `5c - Guion de la presentacion - Taller 1.html` | Guion de apoyo para exponer la presentación. |
+| `5b - Presentacion interactiva - Taller 1.html` | Versión interactiva de la presentación, 10 diapositivas (se abre en el navegador). |
+| `5c - Guion de la presentacion - Taller 1.html` | Guion slide por slide e integrante: 2 diapositivas y 2 minutos por persona, 10:00 en total, con preguntas probables del docente. |
+
+### Reparto de la exposición
+
+| Integrante | Bloque | Slides | Tiempo |
+|------------|--------|--------|--------|
+| Benjamín Peña | Apertura, el problema y los requerimientos | 1 – 2 | 2:00 |
+| Francisco Morales | Dimensionamiento, cableado y normativas | 3 – 4 | 2:00 |
+| Julián Pacheco | Arquitectura lógica y diseño físico | 5 – 6 | 2:00 |
+| Martín Burgos | Red inalámbrica, backbone y segmentación | 7 – 8 | 2:00 |
+| Matías Muñoz | Presupuesto y conclusiones | 9 – 10 | 2:00 |
 
 ## Resumen de la solución
 
