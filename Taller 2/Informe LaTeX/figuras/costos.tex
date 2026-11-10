@@ -1,0 +1,19 @@
+% Gráfico de costos mensuales por escenario. Se incluye con \input.
+\begin{tikzpicture}
+\begin{axis}[
+  ybar, bar width=15pt, width=0.96\linewidth, height=6.2cm,
+  ymin=0, ymax=1400, ylabel={USD por mes}, ylabel style={font=\sffamily\small},
+  symbolic x coords={A,B,C,D},
+  xticklabels={{Actual\\pago por uso},{Expansión\\pago por uso},{Actual\\reserva 1 año},{Expansión\\reserva 1 año}},
+  xtick=data, xticklabel style={align=center, font=\sffamily\small},
+  yticklabel style={font=\sffamily\small, /pgf/number format/.cd, 1000 sep={.}},
+  nodes near coords, every node near coord/.append style={font=\sffamily\scriptsize, /pgf/number format/.cd, fixed, precision=0, 1000 sep={.}},
+  legend style={at={(0.02,0.97)}, anchor=north west, font=\sffamily\small, draw=none},
+  legend cell align=left, axis lines*=left, ymajorgrids, grid style={ink!15},
+  enlarge x limits=0.18,
+]
+\addplot[fill=awsorange, draw=awsorange!80!black] coordinates {(A,489.20) (B,1033.33) (C,377.76) (D,810.45)};
+\addplot[fill=azblue, draw=azblue!80!black] coordinates {(A,554.75) (B,1168.70) (C,380.96) (D,821.11)};
+\legend{AWS (mx-central-1), Azure (Mexico Central)}
+\end{axis}
+\end{tikzpicture}

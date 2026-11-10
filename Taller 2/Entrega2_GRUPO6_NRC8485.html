@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VAR en la nube · Grupo 6</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F4F1EA; --paper2:#EAE5DA; --ink:#1B2733; --muted:#5B6672; --line:#CFC8BA;
+  --aws:#D9822B; --az:#2B7BB9; --teal:#1C7C74; --plum:#6B4C9A; --red:#C2483D; --amber:#E2A53A; --green:#4E9A64;
+  --serif:'Fraunces',Georgia,serif; --sans:'IBM Plex Sans',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#11181f;overflow:hidden}
+body{font-family:var(--sans);color:var(--ink)}
+#viewport{position:fixed;inset:0;overflow:hidden}
+#stage{width:1600px;height:900px;position:absolute;left:50%;top:50%;transform-origin:center center;background:var(--paper);overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.slide{position:absolute;inset:0;padding:72px 96px 80px;display:flex;flex-direction:column;opacity:0;visibility:hidden;transition:opacity .45s ease}
+.slide.active{opacity:1;visibility:visible}
+/* textura de papel cuadriculado */
+#stage::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--paper2) 1px,transparent 1px),linear-gradient(90deg,var(--paper2) 1px,transparent 1px);
+  background-size:40px 40px;opacity:.55}
+.slide>*{position:relative;z-index:1}
+.kicker{font-family:var(--mono);font-size:20px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);display:flex;gap:18px;align-items:center}
+.kicker b{color:var(--aws);font-weight:600}
+h1{font-family:var(--serif);font-weight:700;font-size:96px;line-height:1.0;letter-spacing:-.02em}
+h2{font-family:var(--serif);font-weight:700;font-size:58px;line-height:1.08;letter-spacing:-.015em;margin:14px 0 0;max-width:1300px}
+h2 em{font-style:normal;color:var(--aws)}
+.lead{font-size:28px;line-height:1.4;color:var(--muted);max-width:1100px;margin-top:18px}
+.foot{position:absolute;left:96px;right:96px;bottom:30px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:16px;color:var(--muted);z-index:2}
+.aws{color:var(--aws)} .az{color:var(--az)}
+.chip{display:inline-block;font-family:var(--mono);font-size:18px;padding:4px 12px;border-radius:999px;border:1.5px solid currentColor}
+.grid{display:grid;gap:28px}
+.card{font-size:24px;line-height:1.4;background:#fffdf8;border:1.5px solid var(--line);border-radius:18px;padding:26px 30px}
+.big{font-family:var(--serif);font-weight:700;font-size:64px;line-height:1}
+.small{font-size:21px;color:var(--muted);line-height:1.35}
+.mono{font-family:var(--mono)}
+/* animación de entrada: se revela por máscara, no se desplaza */
+.slide.active .rv{animation:reveal .7s cubic-bezier(.2,.7,.2,1) both}
+.slide.active .rv:nth-child(2){animation-delay:.08s}.slide.active .rv:nth-child(3){animation-delay:.16s}
+.slide.active .rv:nth-child(4){animation-delay:.24s}.slide.active .rv:nth-child(5){animation-delay:.32s}
+@keyframes reveal{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+.slide.active .grow{animation:grow .9s cubic-bezier(.2,.7,.2,1) both;transform-origin:bottom}
+@keyframes grow{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@media (prefers-reduced-motion:reduce){.slide,.slide.active .rv,.slide.active .grow{animation:none!important;transition:none!important}}
+/* notas del orador */
+#notes{position:fixed;left:0;right:0;bottom:0;max-height:34vh;overflow:auto;background:#0e141a;color:#e9e4d8;font:17px/1.5 var(--sans);padding:16px 28px;display:none;z-index:10;border-top:3px solid var(--aws)}
+#notes.on{display:block}
+#notes b{color:var(--aws);font-family:var(--mono);font-weight:600}
+#hint{position:fixed;right:16px;top:12px;color:#8a95a1;font:13px var(--mono);z-index:11}
+#progress{position:absolute;left:0;bottom:0;height:6px;background:var(--aws);z-index:3;transition:width .4s}
+table.m{border-collapse:collapse;width:100%;font-size:24px}
+table.m th,table.m td{padding:14px 16px;border-bottom:1.5px solid var(--line);text-align:left;vertical-align:middle}
+table.m th{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+table.m td.n{text-align:center;font-family:var(--serif);font-weight:700;font-size:30px}
+.win{background:rgba(217,130,43,.12)}
+.s2 .big{font-size:50px;white-space:nowrap}
+.s3 .card{padding:34px 34px 40px;min-height:430px}
+.s3 .card .small{font-size:24px}
+.s3 .pair{font-family:var(--serif);font-size:50px;font-weight:700;margin:16px 0 18px}
+.s3 .card .say{margin-top:28px;font-size:27px;line-height:1.45}
+table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font-size:40px}
+.s6 .big{font-size:110px}
+</style>
+</head>
+<body>
+<div id="hint">← → navegar · F pantalla completa · N notas</div>
+<div id="viewport"><div id="stage">
+
+<!-- 1 · PORTADA -->
+<section class="slide" data-notes="<b>Benjamín · 0:00–0:45</b> Buenos días. Somos el Grupo 6 y les presentamos la propuesta de infraestructura cloud para VAR. Hoy VAR tiene 50 empleados y 200 cuentas; quiere crecer a cuatro estados nuevos. Comparamos AWS y Azure con tarifas oficiales y llegamos a una recomendación concreta.">
+  <div class="kicker rv"><b>Taller 2</b> Infraestructura TI · NRC 8485 · Grupo 6</div>
+  <div style="display:grid;grid-template-columns:1fr 560px;gap:40px;align-items:center;flex:1">
+    <div>
+      <h1 class="rv">VAR sube<br>a la nube</h1>
+      <p class="lead rv" style="font-size:32px">AWS frente a Azure para operar hoy y crecer a cuatro estados</p>
+      <p class="rv" style="margin-top:48px;font-size:22px;line-height:1.6">Benjamín Peña · Francisco Morales · Julián Pacheco<br>Martín Burgos · Matías Muñoz</p>
+      <p class="rv mono" style="margin-top:14px;font-size:18px;color:var(--muted)">Docente: Eduardo Correa Marchant · noviembre de 2026</p>
+    </div>
+    <svg class="rv" viewBox="0 0 560 520" width="560" height="520" aria-label="Cinco entidades conectadas a la región cloud de Querétaro">
+      <g stroke="#1B2733" stroke-width="2" fill="none" stroke-dasharray="6 6" opacity=".55">
+        <path d="M290 300 L240 120"/><path d="M290 300 L110 280"/><path d="M290 300 L330 400"/><path d="M290 300 L420 350"/>
+      </g>
+      <circle cx="290" cy="300" r="64" fill="#D9822B" opacity=".14"/>
+      <circle cx="290" cy="300" r="40" fill="#D9822B"/>
+      <text x="290" y="296" text-anchor="middle" font-family="IBM Plex Mono" font-size="15" fill="#fff" font-weight="600">REGIÓN</text>
+      <text x="290" y="314" text-anchor="middle" font-family="IBM Plex Mono" font-size="13" fill="#fff">Querétaro</text>
+      <g font-family="IBM Plex Sans" font-size="20" fill="#1B2733">
+        <circle cx="240" cy="120" r="14" fill="#2B7BB9"/><text x="262" y="114">Nuevo León</text>
+        <circle cx="110" cy="280" r="14" fill="#2B7BB9"/><text x="40" y="320">Jalisco</text>
+        <circle cx="330" cy="400" r="18" fill="#1B2733"/><text x="356" y="434">CDMX (hoy)</text>
+        <circle cx="420" cy="350" r="14" fill="#2B7BB9"/><text x="440" y="342">Puebla</text>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<!-- 2 · CASO Y SUPUESTOS -->
+<section class="slide" data-notes="<b>Benjamín · 0:45–1:30</b> El caso no da país ni volúmenes, así que los declaramos como supuestos. México, porque tiene estados y porque AWS y Azure tienen región en Querétaro. Hoy: CDMX. Expansión: Nuevo León, Jalisco, Querétaro y Puebla. Los números crecen entre dos y cuatro veces. La meta es 99,9 % de disponibilidad, perder como máximo 15 minutos de datos y volver en 4 horas. Todo lo que no venía en el caso está declarado como supuesto en el informe.">
+  <div class="kicker rv"><b>01</b> El caso · supuestos declarados</div>
+  <h2 class="rv">Hoy un servidor en la CDMX. <em>Mañana, cinco entidades.</em></h2>
+  <div class="grid s2" style="grid-template-columns:repeat(4,1fr);margin-top:48px">
+    <div class="card rv"><div class="small">Empleados</div><div class="big">50<span class="aws"> → 110</span></div></div>
+    <div class="card rv"><div class="small">Cuentas de clientes</div><div class="big">200<span class="aws"> → 600</span></div></div>
+    <div class="card rv"><div class="small">Datos</div><div class="big">0,45<span class="aws"> → 2</span><span style="font-size:32px"> TB</span></div></div>
+    <div class="card rv"><div class="small">Transacciones al mes</div><div class="big">60<span class="aws"> → 200</span><span style="font-size:32px"> mil</span></div></div>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:28px">
+    <div class="card rv" style="border-color:var(--ink)"><div class="small">Disponibilidad</div><div class="big" style="font-size:52px">99,9 %</div><div class="small">≤ 43,8 min de caída al mes</div></div>
+    <div class="card rv" style="border-color:var(--ink)"><div class="small">RPO · pérdida máxima</div><div class="big" style="font-size:52px">15 min</div><div class="small">de datos</div></div>
+    <div class="card rv" style="border-color:var(--ink)"><div class="small">RTO · vuelta al servicio</div><div class="big" style="font-size:52px">4 h</div><div class="small">ante falla de zona o de datos</div></div>
+  </div>
+</section>
+
+<!-- 3 · TRES PARES -->
+<section class="slide" data-notes="<b>Francisco · 1:30–2:30</b> Investigamos los seis servicios en la documentación oficial. Cómputo: EC2 y Azure VM son equivalentes, ambos con SLA de 99,99 % si se reparten en zonas. Objetos: S3 y Blob Storage; ojo, para igualar a S3 en Azure hay que elegir redundancia de zona, ZRS. Base de datos: Azure SQL Database es solo SQL Server. Como VAR usa PostgreSQL, el par justo es RDS for PostgreSQL contra Azure Database for PostgreSQL Flexible Server, como permite el enunciado.">
+  <div class="kicker rv"><b>02</b> Investigación · tres pares de servicios</div>
+  <h2 class="rv">Los mismos bloques, <em>con letra chica distinta</em></h2>
+  <div class="grid s3" style="grid-template-columns:repeat(3,1fr);margin-top:52px">
+    <div class="card rv">
+      <div class="mono small">CÓMPUTO · IaaS</div>
+      <div class="pair"><span class="aws">EC2</span> ↔ <span class="az">VM</span></div>
+      <div class="small">m7i.large ↔ D2s v5<br>2 vCPU · 8 GiB</div>
+      <div class="say">SLA 99,99 % solo si hay instancias en 2 o más zonas</div>
+    </div>
+    <div class="card rv">
+      <div class="mono small">OBJETOS · PaaS</div>
+      <div class="pair"><span class="aws">S3</span> ↔ <span class="az">Blob</span></div>
+      <div class="small">Facturas y contratos<br>400 GB → 1,8 TB</div>
+      <div class="say">Azure iguala a S3 solo con redundancia de zona (ZRS)</div>
+    </div>
+    <div class="card rv">
+      <div class="mono small">BASE DE DATOS · PaaS</div>
+      <div class="pair"><span class="aws">RDS</span> ↔ <span class="az">SQL DB</span></div>
+      <div class="small">SQL DB es solo SQL Server.<br>VAR usa PostgreSQL →</div>
+      <div class="say">par justo: <b>RDS PostgreSQL ↔ PostgreSQL Flexible Server</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · DIFERENCIAS QUE IMPORTAN -->
+<section class="slide" data-notes="<b>Francisco · 2:30–3:30</b> Estas son las diferencias que sí importan para VAR. En disponibilidad de la base gana Azure: 99,99 contra 99,95 %. En crecimiento gana AWS: 15 réplicas de lectura contra 5. Y la diferencia clave: Mexico Central no tiene región pareada, y el respaldo geo-redundante de PostgreSQL en Azure solo funciona en regiones pareadas. En AWS sí se pueden copiar los respaldos a otra región. Eso pesa mucho en continuidad.">
+  <div class="kicker rv"><b>03</b> Matriz 1 · lo que cambia la decisión</div>
+  <h2 class="rv">Tres diferencias que <em>sí importan</em> para VAR</h2>
+  <table class="m xl rv" style="margin-top:56px">
+    <tr><th style="width:40%">Criterio</th><th class="aws">AWS</th><th class="az">Azure</th></tr>
+    <tr><td>SLA de la base con réplica en otra zona</td><td class="n">99,95 %</td><td class="n win">99,99 %</td></tr>
+    <tr><td>Réplicas de lectura por base</td><td class="n win">15</td><td class="n">5</td></tr>
+    <tr><td>Copia de respaldos a otra región desde México</td><td class="n win">Sí</td><td class="n" style="color:var(--red)">No*</td></tr>
+  </table>
+  <p class="small rv" style="margin-top:28px;font-size:22px">* Mexico Central no tiene región pareada, y el geo-respaldo de PostgreSQL Flexible exige un par. Fuente: Microsoft Learn, consultado el 10-11-2026.</p>
+</section>
+
+<!-- 5 · COSTOS -->
+<section class="slide" data-notes="<b>Martín · 3:30–4:45</b> Los costos salen de las tarifas oficiales que usan las calculadoras de AWS y Azure, en las regiones de México, en dólares, consultadas el 10 de noviembre, pagando por uso y sin capas gratuitas. Con la misma arquitectura en ambos, AWS cuesta 489 dólares al mes hoy y 1.033 en la expansión; Azure, 555 y 1.169. Azure sale un 13 % más caro, sobre todo por la base de datos y porque cobra por cada VM respaldada. Al año: 5.870 contra 6.657 hoy, y 12.400 contra 14.024 en la expansión.">
+  <div class="kicker rv"><b>04</b> Matriz 2 · USD por mes · regiones de México · 10-11-2026</div>
+  <h2 class="rv">Pagando por uso, Azure cuesta <em>13 % más</em></h2>
+  <div style="display:grid;grid-template-columns:1fr 430px;gap:50px;margin-top:30px;flex:1;align-items:end">
+    <svg viewBox="0 0 860 480" width="860" height="480" aria-label="Costo mensual por escenario">
+      <line x1="40" y1="430" x2="840" y2="430" stroke="#1B2733" stroke-width="2"/>
+      <g class="grow"><rect x="110" y="270" width="110" height="160" fill="#D9822B"/></g>
+      <g class="grow"><rect x="230" y="248" width="110" height="182" fill="#2B7BB9"/></g>
+      <g class="grow"><rect x="500" y="90" width="110" height="340" fill="#D9822B"/></g>
+      <g class="grow"><rect x="620" y="46" width="110" height="384" fill="#2B7BB9"/></g>
+      <g font-family="Fraunces" font-weight="700" font-size="34" text-anchor="middle" fill="#1B2733">
+        <text x="165" y="258">489</text><text x="285" y="236">555</text><text x="555" y="78">1.033</text><text x="675" y="34">1.169</text>
+      </g>
+      <g font-family="IBM Plex Sans" font-size="24" text-anchor="middle" fill="#5B6672">
+        <text x="225" y="466">Hoy</text><text x="615" y="466">Expansión a 4 estados</text>
+      </g>
+    </svg>
+    <div>
+      <div class="card rv" style="margin-bottom:20px"><span class="chip aws">AWS</span><div class="big" style="font-size:42px;margin-top:10px;white-space:nowrap">5.870 → 12.400</div><div class="small">USD al año</div></div>
+      <div class="card rv"><span class="chip az">Azure</span><div class="big" style="font-size:42px;margin-top:10px;white-space:nowrap">6.657 → 14.024</div><div class="small">USD al año</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · SENSIBILIDAD -->
+<section class="slide" data-notes="<b>Martín · 4:45–5:30</b> Pero ojo: si VAR reserva por un año el cómputo y la base de datos, Azure descuenta más y la diferencia casi desaparece: 378 contra 381 dólares hoy, menos de 1 %. Además, quedan costos fuera que suman entre 20 y 30 % en ambos: balanceador, VPN, monitoreo, soporte e IVA. Conclusión de costos: el precio no decide. Por eso miramos el resto de los criterios.">
+  <div class="kicker rv"><b>05</b> Sensibilidad · reserva de 1 año</div>
+  <h2 class="rv">Con reserva a un año, <em>el precio deja de decidir</em></h2>
+  <div class="grid s6" style="grid-template-columns:1fr 1fr;margin-top:56px">
+    <div class="card rv"><div class="mono small">HOY · USD/mes</div>
+      <div style="display:flex;gap:56px;margin-top:16px;align-items:flex-end"><div><span class="chip aws">AWS</span><div class="big aws">378</div></div><div><span class="chip az">Azure</span><div class="big az">381</div></div></div>
+      <div class="small" style="margin-top:12px">diferencia: 0,8 %</div></div>
+    <div class="card rv"><div class="mono small">EXPANSIÓN · USD/mes</div>
+      <div style="display:flex;gap:56px;margin-top:16px;align-items:flex-end"><div><span class="chip aws">AWS</span><div class="big aws">810</div></div><div><span class="chip az">Azure</span><div class="big az">821</div></div></div>
+      <div class="small" style="margin-top:12px">diferencia: 1,3 %</div></div>
+  </div>
+  <p class="lead rv" style="margin-top:44px;font-size:32px">Fuera de la matriz, en ambos: balanceador, VPN, monitoreo, soporte e IVA. <b style="color:var(--ink)">Supuesto: +20 a 30 %.</b></p>
+</section>
+
+<!-- 7 · ARQUITECTURA -->
+<section class="slide" data-notes="<b>Julián · 5:30–6:30</b> Esta es la arquitectura. Todo vive en la región México Central de AWS, en Querétaro. Los usuarios entran por HTTPS a un balanceador con firewall de aplicaciones. Detrás, instancias EC2 en dos zonas, que crecen solas con Auto Scaling. La base es PostgreSQL en RDS con una réplica síncrona en otra zona. Los documentos van a S3 con versionado y bloqueo. Todo se cifra con claves de VAR y los respaldos se copian cada día a una segunda región. En la expansión solo se activa la tercera zona y una réplica de lectura.">
+  <div class="kicker rv"><b>06</b> Arquitectura propuesta · AWS mx-central-1</div>
+  <svg class="rv" viewBox="0 0 1408 640" width="1408" height="640" style="margin-top:14px" aria-label="Diagrama de arquitectura">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#1B2733"/></marker></defs>
+    <g font-family="IBM Plex Sans" fill="#1B2733">
+      <!-- usuarios -->
+      <rect x="0" y="150" width="200" height="90" rx="16" fill="#fffdf8" stroke="#1B2733" stroke-width="2"/>
+      <text x="100" y="188" text-anchor="middle" font-size="22" font-weight="600">Empleados</text><text x="100" y="216" text-anchor="middle" font-size="18" fill="#5B6672">5 entidades</text>
+      <rect x="0" y="300" width="200" height="90" rx="16" fill="#fffdf8" stroke="#1B2733" stroke-width="2"/>
+      <text x="100" y="338" text-anchor="middle" font-size="22" font-weight="600">Clientes</text><text x="100" y="366" text-anchor="middle" font-size="18" fill="#5B6672">portal web</text>
+      <path d="M200 195 L292 255" stroke="#1B2733" stroke-width="2.5" marker-end="url(#ar)"/>
+      <path d="M200 345 L292 285" stroke="#1B2733" stroke-width="2.5" marker-end="url(#ar)"/>
+      <text x="246" y="210" font-family="IBM Plex Mono" font-size="15" fill="#5B6672">HTTPS</text>
+      <!-- región -->
+      <rect x="300" y="20" width="1100" height="520" rx="20" fill="none" stroke="#D9822B" stroke-width="4"/>
+      <text x="324" y="58" font-family="IBM Plex Mono" font-size="20" font-weight="600" fill="#D9822B">AWS · México (Central) · Querétaro · 3 zonas</text>
+      <!-- WAF/ALB -->
+      <rect x="330" y="215" width="170" height="110" rx="12" fill="#1F3A5F"/>
+      <text x="415" y="262" text-anchor="middle" font-size="21" font-weight="600" fill="#fff">Balanceador</text><text x="415" y="290" text-anchor="middle" font-size="18" fill="#d9e2ec">+ WAF · TLS</text>
+      <!-- zonas -->
+      <rect x="540" y="90" width="270" height="420" rx="14" fill="#fffdf8" stroke="#CFC8BA" stroke-width="2"/>
+      <rect x="830" y="90" width="270" height="420" rx="14" fill="#fffdf8" stroke="#CFC8BA" stroke-width="2"/>
+      <text x="675" y="120" text-anchor="middle" font-family="IBM Plex Mono" font-size="16" fill="#5B6672">ZONA A</text>
+      <text x="965" y="120" text-anchor="middle" font-family="IBM Plex Mono" font-size="16" fill="#5B6672">ZONA B</text>
+      <rect x="570" y="150" width="210" height="110" rx="12" fill="#1C7C74"/><text x="675" y="198" text-anchor="middle" font-size="21" font-weight="600" fill="#fff">EC2 app</text><text x="675" y="226" text-anchor="middle" font-size="17" fill="#d6efe9">Auto Scaling</text>
+      <rect x="860" y="150" width="210" height="110" rx="12" fill="#1C7C74"/><text x="965" y="198" text-anchor="middle" font-size="21" font-weight="600" fill="#fff">EC2 app</text><text x="965" y="226" text-anchor="middle" font-size="17" fill="#d6efe9">2 → 4–6</text>
+      <rect x="570" y="360" width="210" height="110" rx="12" fill="#6B4C9A"/><text x="675" y="408" text-anchor="middle" font-size="21" font-weight="600" fill="#fff">RDS PostgreSQL</text><text x="675" y="436" text-anchor="middle" font-size="17" fill="#e7def3">primaria</text>
+      <rect x="860" y="360" width="210" height="110" rx="12" fill="#6B4C9A"/><text x="965" y="408" text-anchor="middle" font-size="21" font-weight="600" fill="#fff">RDS PostgreSQL</text><text x="965" y="436" text-anchor="middle" font-size="17" fill="#e7def3">réplica síncrona</text>
+      <path d="M500 255 L566 210" stroke="#1B2733" stroke-width="2.5" marker-end="url(#ar)"/>
+      <path d="M500 285 C700 300 760 300 856 210" stroke="#1B2733" stroke-width="2.5" fill="none" marker-end="url(#ar)"/>
+      <path d="M675 260 L675 356" stroke="#1B2733" stroke-width="2.5" marker-end="url(#ar)"/>
+      <path d="M780 415 L856 415" stroke="#6B4C9A" stroke-width="3"/><path d="M786 415 L856 415" stroke="#6B4C9A" stroke-width="3" marker-end="url(#ar)"/>
+      <!-- servicios -->
+      <g font-size="19">
+        <rect x="1130" y="90" width="245" height="74" rx="12" fill="#fbeedd" stroke="#D9822B" stroke-width="2"/><text x="1252" y="122" text-anchor="middle" font-weight="600">S3 documentos</text><text x="1252" y="148" text-anchor="middle" font-size="16" fill="#5B6672">versionado + bloqueo</text>
+        <rect x="1130" y="180" width="245" height="74" rx="12" fill="#fbeedd" stroke="#D9822B" stroke-width="2"/><text x="1252" y="212" text-anchor="middle" font-weight="600">KMS</text><text x="1252" y="238" text-anchor="middle" font-size="16" fill="#5B6672">claves de VAR</text>
+        <rect x="1130" y="270" width="245" height="74" rx="12" fill="#fbeedd" stroke="#D9822B" stroke-width="2"/><text x="1252" y="302" text-anchor="middle" font-weight="600">AWS Backup</text><text x="1252" y="328" text-anchor="middle" font-size="16" fill="#5B6672">PITR 35 días</text>
+        <rect x="1130" y="360" width="245" height="74" rx="12" fill="#fbeedd" stroke="#D9822B" stroke-width="2"/><text x="1252" y="392" text-anchor="middle" font-weight="600">SSO + MFA</text><text x="1252" y="418" text-anchor="middle" font-size="16" fill="#5B6672">Identity Center</text>
+        <rect x="1130" y="450" width="245" height="74" rx="12" fill="#fbeedd" stroke="#D9822B" stroke-width="2"/><text x="1252" y="482" text-anchor="middle" font-weight="600">Monitoreo</text><text x="1252" y="508" text-anchor="middle" font-size="16" fill="#5B6672">CloudWatch · GuardDuty</text>
+      </g>
+      <!-- región secundaria -->
+      <rect x="300" y="568" width="1100" height="64" rx="14" fill="none" stroke="#5B6672" stroke-width="2" stroke-dasharray="8 6"/>
+      <text x="850" y="608" text-anchor="middle" font-size="20" fill="#5B6672">Región secundaria (EE. UU.): copia diaria cifrada de respaldos · desastre regional</text>
+      <path d="M1252 344 L1252 345" stroke="none"/>
+    </g>
+  </svg>
+</section>
+
+<!-- 8 · RECOMENDACIÓN -->
+<section class="slide" data-notes="<b>Julián · 6:30–7:30</b> Para decidir ponderamos cinco criterios. Seguridad empata. Costo gana AWS. Disponibilidad de la base gana Azure. Crecimiento y, sobre todo, continuidad ante un desastre regional los gana AWS. Resultado: 4,80 contra 4,30. Recomendamos AWS como proveedor único: con dos personas en TI, mantener dos nubes duplica trabajo sin beneficio. Y la disponibilidad compuesta del camino transaccional es de 99,93 %, sobre la meta.">
+  <div class="kicker rv"><b>07</b> Recomendación · matriz ponderada</div>
+  <h2 class="rv">Recomendamos <em>AWS</em>, una sola nube</h2>
+  <div style="display:grid;grid-template-columns:1fr 360px;gap:60px;margin-top:40px;align-items:center">
+    <table class="m rv">
+      <tr><th>Criterio</th><th>Peso</th><th class="aws">AWS</th><th class="az">Azure</th></tr>
+      <tr><td>Seguridad</td><td class="mono">25 %</td><td class="n">5</td><td class="n">5</td></tr>
+      <tr><td>Costo</td><td class="mono">25 %</td><td class="n win">5</td><td class="n">4</td></tr>
+      <tr><td>Disponibilidad de la base</td><td class="mono">20 %</td><td class="n">4</td><td class="n win">5</td></tr>
+      <tr><td>Crecimiento</td><td class="mono">15 %</td><td class="n win">5</td><td class="n">4</td></tr>
+      <tr><td>Continuidad ante desastre regional</td><td class="mono">15 %</td><td class="n win">5</td><td class="n">3</td></tr>
+    </table>
+    <div>
+      <div class="card rv" style="border:3px solid var(--aws);text-align:center"><div class="mono small">AWS</div><div class="big aws" style="font-size:96px">4,80</div></div>
+      <div class="card rv" style="text-align:center;margin-top:18px"><div class="mono small">Azure</div><div class="big az" style="font-size:64px">4,30</div></div>
+      <p class="small rv" style="margin-top:18px;text-align:center">Disponibilidad compuesta del camino transaccional: <b style="color:var(--ink)">99,93 %</b></p>
+    </div>
+  </div>
+</section>
+
+<!-- 9 · MIGRACIÓN Y CRONOGRAMA -->
+<section class="slide" data-notes="<b>Matías · 7:30–8:30</b> La migración es por etapas y con replicación, no de un golpe. Primero se copian los documentos con DataSync mientras VAR opera. Después, la base se replica con DMS, de modo que la nube va solo segundos atrás. Hacemos un piloto con 20 cuentas y el corte un fin de semana, fuera del cierre de mes, con unos 30 minutos de escrituras congeladas. Validamos conteos de filas y sumas de montos. Son 16 semanas en seis fases, y después se suma un estado por mes.">
+  <div class="kicker rv"><b>08</b> Migración y cronograma · 16 semanas</div>
+  <h2 class="rv">Por etapas y con replicación, <em>nunca de un golpe</em></h2>
+  <svg class="rv" viewBox="0 0 1408 330" width="1408" height="330" style="margin-top:36px" aria-label="Carta Gantt">
+    <g font-family="IBM Plex Sans" font-size="22" fill="#1B2733">
+      <g font-family="IBM Plex Mono" font-size="15" fill="#5B6672">
+        <text x="300" y="20">S1</text><text x="568" y="20">S4</text><text x="836" y="20">S8</text><text x="1104" y="20">S12</text><text x="1372" y="20">S16</text>
+      </g>
+      <line x1="300" y1="30" x2="1400" y2="30" stroke="#CFC8BA" stroke-width="2"/>
+      <text x="0" y="66">1 · Diagnóstico</text><rect x="300" y="46" width="137" height="28" rx="6" fill="#1F3A5F"/>
+      <text x="0" y="114">2 · Diseño</text><rect x="437" y="94" width="137" height="28" rx="6" fill="#1F3A5F"/>
+      <text x="0" y="162">3 · Preparación</text><rect x="574" y="142" width="206" height="28" rx="6" fill="#1F3A5F"/>
+      <text x="0" y="210">4 · Piloto (20 cuentas)</text><rect x="780" y="190" width="206" height="28" rx="6" fill="#1F3A5F"/>
+      <text x="0" y="258">5 · Corte y rollback listo</text><rect x="986" y="238" width="137" height="28" rx="6" fill="#D9822B"/>
+      <text x="0" y="306">6 · Optimización</text><rect x="1123" y="286" width="277" height="28" rx="6" fill="#1C7C74"/>
+    </g>
+  </svg>
+  <div class="grid" style="grid-template-columns:repeat(3,1fr);margin-top:26px">
+    <div class="card rv"><b>Documentos</b> · DataSync incremental, con sumas de verificación</div>
+    <div class="card rv"><b>Base</b> · DMS: carga completa y CDC; conciliación de montos</div>
+    <div class="card rv"><b>Corte</b> · fin de semana, ~30 min de escrituras congeladas</div>
+  </div>
+</section>
+
+<!-- 10 · RIESGOS Y CONTINUIDAD -->
+<section class="slide" data-notes="<b>Matías · 8:30–9:30</b> Identificamos ocho riesgos con probabilidad e impacto. El único alto es el acceso indebido, porque en la nube las identidades y los permisos son responsabilidad de VAR: lo mitigamos con SSO, MFA y mínimo privilegio. Para continuidad: una falla de zona se resuelve en uno o dos minutos sin perder datos; una corrupción, con restauración a un punto en el tiempo de menos de 5 minutos. Y si el corte sale mal, tenemos rollback: el servidor actual recibe los cambios durante dos semanas y se vuelve atrás en 2 horas.">
+  <div class="kicker rv"><b>09</b> Riesgos y continuidad</div>
+  <h2 class="rv">Ocho riesgos, <em>uno alto</em>, y un camino de vuelta</h2>
+  <div style="display:grid;grid-template-columns:520px 1fr;gap:56px;margin-top:34px">
+    <svg class="rv" viewBox="0 0 520 470" width="520" height="470" aria-label="Mapa de calor de riesgos">
+      <g font-family="IBM Plex Mono" font-size="15" fill="#5B6672">
+        <text x="250" y="465" text-anchor="middle">IMPACTO →</text>
+        <text x="16" y="215" text-anchor="middle" transform="rotate(-90 16 215)">PROBABILIDAD →</text>
+      </g>
+      <g id="heat"></g>
+    </svg>
+    <div>
+      <table class="m rv" style="font-size:22px">
+        <tr><th>Falla</th><th>RPO</th><th>RTO</th></tr>
+        <tr><td>Zona de disponibilidad</td><td class="mono">0</td><td class="mono">1–2 min</td></tr>
+        <tr><td>Borrado o corrupción</td><td class="mono">≤ 5 min</td><td class="mono">≤ 2 h</td></tr>
+        <tr><td>Ransomware</td><td class="mono">≤ 15 min</td><td class="mono">≤ 4 h</td></tr>
+        <tr><td>Desastre regional</td><td class="mono">≤ 24 h</td><td class="mono">≤ 24 h</td></tr>
+      </table>
+      <div class="card rv" style="margin-top:22px;border-color:var(--aws)"><b>Rollback:</b> durante 2 semanas el servidor actual recibe los cambios (DMS inverso). Volver atrás toma 2 h.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 11 · CONCLUSIÓN -->
+<section class="slide" data-notes="<b>Benjamín · 9:30–10:00</b> Respondemos la pregunta de cierre: recomendamos AWS en México Central, por 489 dólares al mes hoy y 1.033 en la expansión, con 99,9 %, RPO de 15 minutos y RTO de 4 horas. Cambiaríamos a Azure si VAR usara Microsoft 365 o SQL Server, o si ninguna copia pudiera salir de México. Gracias; quedamos atentos a sus preguntas.">
+  <div class="kicker rv"><b>10</b> Pregunta de cierre</div>
+  <h2 class="rv" style="font-size:62px">Hoy y en cuatro estados: <em>AWS en México Central</em></h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:44px">
+    <div class="card rv" style="border:3px solid var(--aws)">
+      <div class="mono small">LO QUE RECOMENDAMOS</div>
+      <p style="font-size:27px;line-height:1.5;margin-top:12px">US$ 489/mes hoy → US$ 1.033 en la expansión<br>99,9 % · RPO 15 min · RTO 4 h<br>Crecer = cambiar parámetros, no migrar de nuevo</p>
+    </div>
+    <div class="card rv">
+      <div class="mono small">CAMBIARÍAMOS A AZURE SI…</div>
+      <p style="font-size:27px;line-height:1.5;margin-top:12px">VAR usara Microsoft 365 o Entra ID<br>la aplicación corriera en SQL Server<br>ninguna copia pudiera salir de México</p>
+    </div>
+  </div>
+  <p class="rv" style="margin-top:40px;font-family:var(--serif);font-size:40px;font-weight:700">Gracias. <span style="color:var(--muted);font-weight:500">¿Preguntas?</span></p>
+</section>
+
+<div class="foot"><span>Grupo 6 · NRC 8485 · Infraestructura TI</span><span id="count">1 / 11</span></div>
+<div id="progress"></div>
+</div></div>
+<div id="notes"></div>
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var i=0, stage=document.getElementById('stage');
+  function fit(){var s=Math.min(window.innerWidth/1600,window.innerHeight/900);stage.style.transform='translate(-50%,-50%) scale('+s+')';}
+  window.addEventListener('resize',fit);fit();
+  // mapa de calor de riesgos
+  var heat=document.getElementById('heat'), ns='http://www.w3.org/2000/svg', cell=80, ox=50, oy=20;
+  function col(v){return v>=15?'#E9A69F':v>=8?'#F3D59B':'#BFDDC7';}
+  for(var p=1;p<=5;p++)for(var im=1;im<=5;im++){
+    var r=document.createElementNS(ns,'rect');r.setAttribute('x',ox+(im-1)*cell);r.setAttribute('y',oy+(5-p)*cell);
+    r.setAttribute('width',cell-4);r.setAttribute('height',cell-4);r.setAttribute('rx',8);r.setAttribute('fill',col(p*im));heat.appendChild(r);}
+  var risks=[['R1',2,5],['R2',3,5],['R3',3,3],['R4',2,4],['R5',3,3],['R6',2,4],['R7',4,3],['R8',2,5]], seen={};
+  risks.forEach(function(k){var key=k[1]+'-'+k[2], n=seen[key]=(seen[key]||0)+1;
+    var t=document.createElementNS(ns,'text');t.setAttribute('x',ox+(k[2]-1)*cell+(cell-4)/2);
+    t.setAttribute('y',oy+(5-k[1])*cell+(n===1?32:58));t.setAttribute('text-anchor','middle');
+    t.setAttribute('font-family','IBM Plex Mono');t.setAttribute('font-size','20');t.setAttribute('font-weight','600');t.setAttribute('fill','#1B2733');
+    t.textContent=k[0];heat.appendChild(t);});
+  var notes=document.getElementById('notes');
+  function show(n){i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach(function(s,j){s.classList.toggle('active',j===i);});
+    document.getElementById('count').textContent=(i+1)+' / '+slides.length;
+    document.getElementById('progress').style.width=((i+1)/slides.length*100)+'%';
+    notes.innerHTML=slides[i].getAttribute('data-notes')||'';
+    try{history.replaceState(null,'','#'+(i+1));}catch(e){}}
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>=0){e.preventDefault();show(i+1);}
+    else if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>=0){e.preventDefault();show(i-1);}
+    else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);
+    else if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();else document.exitFullscreen();}
+    else if(e.key==='n'||e.key==='N')notes.classList.toggle('on');});
+  document.getElementById('viewport').addEventListener('click',function(e){show(e.clientX>window.innerWidth/2?i+1:i-1);});
+  function fromHash(){var h=parseInt((location.hash||'').slice(1),10); show(isNaN(h)?0:h-1);}
+  window.addEventListener('hashchange',fromHash); fromHash();
+  window.goTo=function(n){show(n-1);};
+})();
+</script>
+</body>
+</html>

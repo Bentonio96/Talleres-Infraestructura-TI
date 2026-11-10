@@ -1,0 +1,22 @@
+% Carta Gantt de la implementación (semanas). Se incluye con \input.
+\begin{ganttchart}[
+  hgrid, vgrid={*1{ink!12, dotted}},
+  x unit=0.88cm, y unit chart=0.62cm, y unit title=0.55cm,
+  title label font=\sffamily\scriptsize\bfseries, title/.append style={fill=navy!10, draw=ink!30},
+  bar/.append style={fill=navy!70, draw=navy}, bar height=0.55,
+  bar label font=\sffamily\scriptsize, bar label node/.append style={align=right},
+  milestone/.append style={fill=awsorange, draw=awsorange!70!black}, milestone label font=\sffamily\scriptsize\itshape,
+  group/.append style={fill=ink!60}, inline=false
+]{1}{16}
+\gantttitle{Semanas de implementación}{16}\\
+\gantttitlelist{1,...,16}{1}\\
+\ganttbar{1. Diagnóstico}{1}{2}\\
+\ganttbar{2. Diseño}{3}{4}\\
+\ganttbar{3. Preparación}{5}{7}\\
+\ganttbar{4. Migración piloto}{8}{10}\\
+\ganttbar[bar/.append style={fill=awsorange}]{5. Puesta en producción}{11}{12}\\
+\ganttmilestone{Corte (fin de semana)}{11}\\
+\ganttmilestone{Acta de aceptación}{12}\\
+\ganttbar[bar/.append style={fill=teal!70}]{6. Optimización}{13}{16}\\
+\ganttmilestone{Simulacro de recuperación}{14}
+\end{ganttchart}

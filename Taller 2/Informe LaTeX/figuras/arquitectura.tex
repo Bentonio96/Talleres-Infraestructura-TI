@@ -1,0 +1,72 @@
+% Diagrama de arquitectura propuesta (AWS, mx-central-1). Se incluye con \input.
+\begin{tikzpicture}[
+  font=\sffamily\scriptsize, >=Stealth,
+  box/.style={draw=#1, fill=#1!8, rounded corners=2pt, align=center, inner sep=3pt},
+  box/.default=navy,
+  svc/.style={draw=awsorange, fill=awsorange!10, rounded corners=2pt, align=center, minimum width=2.9cm, minimum height=0.85cm, inner sep=2pt},
+  user/.style={draw=ink!70, fill=white, rounded corners=6pt, align=center, minimum width=2.9cm, minimum height=1.1cm},
+  lnk/.style={->, thick, draw=ink!75},
+  dlnk/.style={->, thick, dashed, draw=ink!55},
+  lbl/.style={font=\sffamily\tiny, fill=white, inner sep=1pt}
+]
+% ---------- Región ----------
+\draw[awsorange, very thick, rounded corners=4pt] (6.3,-0.9) rectangle (19.2,8.1);
+\node[anchor=north west, font=\sffamily\footnotesize\bfseries, text=awsorange] at (6.4,8.05) {AWS · Región México (Central) \texttt{mx-central-1} · Querétaro};
+% ---------- VPC ----------
+\draw[navy, thick, rounded corners=3pt] (6.6,-0.6) rectangle (15.3,7.45);
+\node[anchor=north west, font=\sffamily\scriptsize\bfseries, text=navy] at (6.7,7.42) {VPC 10.20.0.0/16};
+% AZ columns
+\foreach \x/\n/\s in {6.85/a/solid, 9.65/b/solid, 12.45/c/dashed}{
+  \draw[ink!45, \s, rounded corners=2pt] (\x,-0.4) rectangle ++(2.65,7.4);
+  \node[font=\sffamily\tiny\bfseries, text=ink!70] at (\x+1.325,6.8) {Zona de disponibilidad \n};
+}
+\node[font=\sffamily\tiny, text=ink!60, align=center] at (13.775,6.45) {(se habilita en\\la expansión)};
+% row labels
+\node[rotate=90, font=\sffamily\tiny, text=ink!60] at (6.72,6.25) {Subred pública};
+\node[rotate=90, font=\sffamily\tiny, text=ink!60] at (6.72,3.3) {Subred app};
+\node[rotate=90, font=\sffamily\tiny, text=ink!60] at (6.72,-0.05) {Subred datos};
+% ALB
+\node[box=navy, minimum width=5.2cm, minimum height=0.8cm] (alb) at (9.6,5.4) {\textbf{Application Load Balancer} + AWS WAF\\ TLS 1.2+, certificados ACM};
+\node[box=ink, minimum width=2.2cm, minimum height=0.8cm, dashed] (albc) at (13.775,5.4) {nodo ALB};
+% EC2
+\node[box=teal, minimum width=2.3cm, minimum height=1.05cm] (ec2a) at (8.175,3.3) {EC2 m7i.large\\ aplicación web/API};
+\node[box=teal, minimum width=2.3cm, minimum height=1.05cm] (ec2b) at (10.975,3.3) {EC2 m7i.large\\ aplicación web/API};
+\node[box=teal, minimum width=2.3cm, minimum height=1.05cm, dashed] (ec2c) at (13.775,3.3) {EC2 adicionales\\ (de 2 a 4–6)};
+\draw[teal, densely dotted, thick, rounded corners=3pt] (7.0,2.6) rectangle (14.95,4.0);
+% RDS
+\node[box=purple, minimum width=2.3cm, minimum height=1.05cm] (rdsa) at (8.175,0.9) {RDS PostgreSQL\\ \textbf{primaria}};
+\node[box=purple, minimum width=2.3cm, minimum height=1.05cm] (rdsb) at (10.975,0.9) {RDS PostgreSQL\\ \textbf{standby}};
+\node[box=purple, minimum width=2.3cm, minimum height=1.05cm, dashed] (rdsc) at (13.775,0.9) {réplica de lectura\\ (reportería)};
+\draw[<->, thick, purple] (rdsa) -- (rdsb);
+\node[lbl, text=purple] at (9.575,0.12) {síncrona};
+\draw[->, thick, dashed, purple] (rdsb.south) to[bend right=25] node[lbl, below]{asíncrona} (rdsc.south);
+% conexiones internas
+\draw[lnk] (alb.south) ++(-1.4,0) -- (ec2a.north);
+\draw[lnk] (alb.south) ++(1.4,0) -- (ec2b.north);
+\draw[lnk] (ec2a.south) -- (rdsa.north);
+\draw[lnk] (ec2b.south) -- (rdsa.north east);
+% ---------- servicios regionales ----------
+\node[svc] (s3)  at (17.25,6.55) {\textbf{Amazon S3}\\ documentos, versionado,\\ Object Lock};
+\node[svc] (kms) at (17.25,5.2) {\textbf{AWS KMS}\\ claves gestionadas por VAR};
+\node[svc] (bk)  at (17.25,3.95) {\textbf{AWS Backup}\\ planes diarios + PITR};
+\node[svc] (obs) at (17.25,2.7) {\textbf{CloudWatch, CloudTrail}\\ GuardDuty, Security Hub};
+\node[svc] (idc) at (17.25,1.45) {\textbf{IAM Identity Center}\\ SSO + MFA, roles mínimos};
+\node[svc] (ssm) at (17.25,0.2) {\textbf{Systems Manager}\\ acceso admin sin SSH};
+\draw[lnk] (14.95,3.3) -- (15.48,3.3) |- node[lbl, rotate=90, pos=0.3]{endpoint privado} (s3.west);
+% ---------- usuarios ----------
+\node[user] (emp) at (1.6,6.2) {\textbf{Empleados}\\ de 50 a 110, en 5 estados};
+\node[user] (cli) at (1.6,4.2) {\textbf{Clientes}\\ de 200 a 600 cuentas};
+\node[box=ink, minimum width=2.9cm, minimum height=1.1cm, dashed] (onp) at (1.6,1.0) {\textbf{Centro de datos actual}\\ oficina CDMX\\ (se retira tras el corte)};
+\node[box=navy, minimum width=2.4cm, minimum height=0.9cm] (dns) at (4.6,5.2) {Route 53\\ (DNS, TTL 60 s)};
+\draw[lnk] (emp.east) -- (dns.north west);
+\node[lbl] at (3.55,6.45) {HTTPS + SSO};
+\draw[lnk] (cli.east) -- (dns.south west);
+\node[lbl] at (3.55,3.95) {HTTPS};
+\draw[lnk] (dns.east) -- (alb.west);
+\draw[dlnk] (onp.east) -- node[lbl, above, pos=0.42]{VPN sitio a sitio} node[lbl, below, pos=0.42]{DMS + DataSync} (rdsa.west);
+% ---------- región secundaria ----------
+\draw[ink!60, dashed, rounded corners=3pt] (6.3,-2.5) rectangle (19.2,-1.25);
+\node[anchor=west, font=\sffamily\scriptsize, text=ink] at (6.45,-1.875) {\textbf{Región secundaria (EE.\,UU. Este, Ohio)}: copia diaria cifrada de los respaldos para un desastre regional};
+\draw[dlnk] (bk.east) -- (18.95,3.95) -- (18.95,-1.25);
+\node[font=\sffamily\tiny, text=teal, fill=white, inner sep=1pt] at (11.0,4.0) {EC2 Auto Scaling group (mín. 2, deseado 2 hoy / 4 en expansión)};
+\end{tikzpicture}

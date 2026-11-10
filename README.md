@@ -15,6 +15,7 @@ Docente: Eduardo Correa Marchant
 | Taller | Descripción | Entrega | Estado |
 |--------|-------------|---------|--------|
 | Taller 1 | Diseño y presupuesto de una infraestructura de red para un edificio corporativo de 5 pisos y 400 usuarios. | [`Taller 1/`](./Taller%201) | Entregado |
+| Taller 2 | Comparación AWS vs. Azure y propuesta de infraestructura cloud para la empresa VAR (operación actual y expansión a cuatro estados). | [`Taller 2/`](./Taller%202) | En preparación |
 
 > Los siguientes talleres se irán agregando a esta tabla a medida que se completen.
 
@@ -70,3 +71,52 @@ alineado con las mismas 10 diapositivas.
 - **30 Access Points** WiFi 6 (6 por piso), dimensionados por criterio de capacidad.
 - **Backbone** de fibra óptica multimodo OM4 de 12 hilos por piso.
 - **Inversión total estimada:** $ 207.104.695 CLP ($ 517.762 por usuario).
+
+## Taller 2 — Contenido de la entrega
+
+El archivo a subir es **`GRUPO6_Trabajo2_8485.zip`**, con el formato de nombre
+exigido en el enunciado (`GRUPOX_Trabajo2_8485.zip`): repositorio LaTeX
+(código, figuras e imágenes) más el PDF exportado, la planilla de costos (E2) y
+la presentación de la defensa (E3).
+
+| Archivo | Descripción |
+|---------|-------------|
+| `GRUPO6_Trabajo2_8485.zip` | Entrega completa comprimida. |
+| `Entrega2_GRUPO6_NRC8485.pdf` | Informe técnico compilado (portada, índice, 9 secciones, declaración de uso de IA, referencias APA 7 y 3 anexos). |
+| `Informe LaTeX/` | Fuente del informe: `Entrega2_GRUPO6_NRC8485.tex`, `referencias.bib` (biblatex-apa) y `figuras/` (TikZ y logo). Se compila con `latexmk -xelatex`. |
+| `Planilla de costos - AWS vs Azure.xlsx` | Tarifas unitarias con fuente y fecha, los dos escenarios con fórmulas (cantidad × tarifa), la Matriz comparativa 2 y la sensibilidad con reservas de 1 año. |
+| `Entrega2_GRUPO6_NRC8485.html` | Presentación de la defensa: 11 diapositivas 16:9, un solo archivo (← → navegar, F pantalla completa, N notas del orador). |
+| `Planos y diagramas/` | Diagramas exportados del informe. |
+
+### Planos y diagramas
+
+| Archivo | Representa |
+|---------|-----------|
+| `1 - Arquitectura propuesta en AWS (mx-central-1).png` | Arquitectura recomendada: VPC en 3 zonas, ALB + WAF, EC2 Auto Scaling, RDS PostgreSQL Multi-AZ, S3 y copia de respaldos a una región secundaria. |
+| `2 - Costos mensuales por escenario.png` | Costo mensual de AWS y Azure en ambos escenarios, pagando por uso y con reserva de 1 año. |
+| `3 - Cronograma de implementacion (Gantt).png` | Las 6 fases de la implementación en 16 semanas. |
+
+### Material complementario
+
+Apoyo interno del grupo para ensayar. **No forma parte del `.zip` de la entrega.**
+
+| Archivo | Descripción |
+|---------|-------------|
+| `Guion de la presentacion - Taller 2.pdf` | Guion lámina por lámina e integrante (4 páginas): 10:00 en total, con la pregunta probable del docente en cada lámina y un banco de preguntas. |
+
+### Reparto de la exposición
+
+| Integrante | Bloque | Slides | Tiempo |
+|------------|--------|--------|--------|
+| Benjamín Peña | Apertura, caso y supuestos; cierre | 1 – 2 y 11 | 0:00 – 1:30 y 9:30 – 10:00 |
+| Francisco Morales | Comparación de servicios (Matriz 1) | 3 – 4 | 1:30 – 3:30 |
+| Martín Burgos | Costos en dos escenarios (Matriz 2) | 5 – 6 | 3:30 – 5:30 |
+| Julián Pacheco | Arquitectura y recomendación | 7 – 8 | 5:30 – 7:30 |
+| Matías Muñoz | Migración, riesgos y continuidad | 9 – 10 | 7:30 – 9:30 |
+
+### Resumen de la propuesta
+
+- **Supuestos:** México; hoy la CDMX y, en la expansión, Nuevo León, Jalisco, Querétaro y Puebla. De 50 a 110 empleados, de 200 a 600 cuentas, de 0,45 a 2 TB y de 60.000 a 200.000 transacciones al mes. 99,9 %, RPO 15 min y RTO 4 h.
+- **Costos** (regiones de México, USD, pago por uso, 10-11-2026): AWS US$ 489/mes hoy y US$ 1.033 en la expansión; Azure US$ 555 y US$ 1.169. Con reserva de 1 año la diferencia baja a ~1 %.
+- **Recomendación:** AWS en `mx-central-1` como proveedor único (matriz ponderada 4,80 frente a 4,30), sobre todo por la continuidad: Mexico Central no tiene región pareada para el geo-respaldo de PostgreSQL en Azure.
+- **Implementación:** migración por etapas con replicación (DMS + DataSync) en 16 semanas, 8 riesgos con mitigación, rollback de 2 h y 7 KPI.
