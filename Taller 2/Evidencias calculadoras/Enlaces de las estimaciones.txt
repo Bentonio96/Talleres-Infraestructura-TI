@@ -1,0 +1,19 @@
+Taller 2 - Infraestructura TI - NRC 8485 - Grupo 6
+Estimaciones en las calculadoras oficiales (10-11-2026, USD, pago por uso, sin iniciar sesion)
+
+AWS Pricing Calculator (enlaces publicos de solo lectura; AWS los mantiene durante un ano):
+- Escenario actual (495,45 USD/mes; 5.945,40 USD/ano):
+  https://calculator.aws/#/estimate?id=29528f0ed01238d8fbe2b654a022153c9da3a295
+- Escenario de expansion a cuatro estados (1.045,83 USD/mes; 12.549,96 USD/ano):
+  https://calculator.aws/#/estimate?id=6d5b6a76d4c17116cb59ca8601950feea26ce12b
+
+Azure Pricing Calculator (https://azure.microsoft.com/es-es/pricing/calculator/):
+Guardar o compartir una estimacion exige iniciar sesion, por lo que se adjuntan capturas.
+- Escenario actual: 556,03 USD/mes (capturas "Azure - escenario actual (1 a 3 de 3)").
+- Escenario de expansion: 1.179,98 USD/mes (capturas "Azure - escenario expansion (1 a 3 de 3)").
+La calculadora de Azure descuenta los primeros 100 GB de salida a Internet. Como el enunciado
+excluye las capas gratuitas, la Matriz comparativa 2 suma esos 100 GB x 0,087 = 8,70 USD/mes:
+564,73 USD/mes (actual) y 1.188,68 USD/mes (expansion).
+
+La configuracion de cada estimacion esta en el Anexo C del informe y en la hoja "Calculadoras"
+de la planilla de costos.

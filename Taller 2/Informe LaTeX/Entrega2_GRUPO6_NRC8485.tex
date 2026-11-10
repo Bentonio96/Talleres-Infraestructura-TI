@@ -250,7 +250,7 @@ Servicio y función & EC2: VM IaaS. S3: objetos PaaS. RDS: base relacional admin
 Aplicación concreta en VAR & 2 × \texttt{m7i.large} (4 en la expansión), S3 para facturas y contratos, RDS PostgreSQL Multi-AZ \texttt{db.m7g.large} (\texttt{xlarge} en la expansión). & 2 × \texttt{D2s v5} (4 en la expansión), Blob caliente ZRS, PostgreSQL Flexible GP de 2 vCore (4 en la expansión) con HA de zona.\\
 \rowcolor{rowgray} Escalabilidad y rendimiento & Auto Scaling horizontal en 3 zonas; RDS escala de forma vertical y con réplicas de lectura. & Scale Sets en 3 zonas; Flexible Server escala de forma vertical y con réplicas; SQL DB, además, con Hyperscale y serverless.\\
 Seguridad, respaldo y SLA publicado & KMS, IAM, cifrado por defecto en S3. SLA: EC2 en 2+ zonas 99,99\,\%; S3 99,9\,\%; RDS Multi-AZ 99,95\,\%. Copia de respaldos entre regiones con AWS Backup. & Key Vault, Entra ID y cifrado por defecto. SLA: VM en zonas 99,99\,\%; Blob caliente 99,9\,\%; PostgreSQL con HA de zona 99,99\,\%. Sin par regional para el geo-respaldo.\\
-\rowcolor{rowgray} Costo mensual estimado (actual) & \textbf{\usd{489,20}} & \textbf{\usd{554,75}}\\
+\rowcolor{rowgray} Costo mensual estimado (actual) & \textbf{\usd{495,45}} & \textbf{\usd{564,73}}\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -262,8 +262,8 @@ Seguridad, respaldo y SLA publicado & KMS, IAM, cifrado por defecto en S3. SLA: 
 \begin{itemize}
   \item \textbf{Regiones:} AWS \texttt{mx-central-1} (México Central, Querétaro) y Azure \emph{Mexico Central} (Querétaro). Se eligieron porque dejan los datos en el país y a pocos milisegundos de las cinco entidades \parencite{aws-regions,az-geos}.
   \item \textbf{Moneda y fecha:} dólares estadounidenses (USD), sin impuestos (el IVA en México es de 16\,\%). Tarifas consultadas el \textbf{10 de noviembre de 2026}.
-  \item \textbf{Fuente:} las mismas tarifas públicas que usan AWS Pricing Calculator y Azure Pricing Calculator, descargadas de sus interfaces oficiales de precios: AWS Price List Bulk API (archivos de \texttt{mx-central-1} publicados entre el 29 de octubre y el 9 de noviembre de 2026) y Azure Retail Prices API \parencite{aws-pricelist,az-retail,aws-calc,az-calc}. El Anexo~\ref{anx:calculadoras} explica cómo reproducir cada configuración en las calculadoras.
-  \item \textbf{Modalidad de cobro:} pago por uso (On-Demand), sin compromisos ni descuentos. No se usan capas gratuitas, ni siquiera los primeros 100 GB de salida gratuitos de ambos proveedores. El efecto de reservar por un año se muestra aparte, como sensibilidad.
+  \item \textbf{Fuente:} \textbf{AWS Pricing Calculator} y \textbf{Azure Pricing Calculator}, configuradas sin iniciar sesión, cuyas tarifas coinciden con las de las interfaces oficiales que las alimentan: AWS Price List Bulk API (archivos de \texttt{mx-central-1} del 29 de octubre al 9 de noviembre de 2026) y Azure Retail Prices API \parencite{aws-calc,az-calc,aws-pricelist,az-retail}. Enlaces y capturas en el Anexo~\ref{anx:calculadoras}.
+  \item \textbf{Modalidad de cobro:} pago por uso (On-Demand), sin compromisos ni descuentos. No se usan capas gratuitas: Azure Pricing Calculator descuenta los primeros 100 GB de salida y el grupo los suma de vuelta (\usd{8,70} al mes). El efecto de reservar por un año se muestra aparte, como sensibilidad.
   \item \textbf{Fórmulas:} un mes tiene 730 horas. Para cada línea, \(\text{Costo} = \text{Cantidad} \times \text{Tarifa}\); el total mensual es la suma de las líneas y el total anual es igual a \(12 \times\) el total mensual. El detalle de cada línea está en el Anexo~\ref{anx:detalle} y en la planilla Excel que acompaña al informe.
 \end{itemize}
 
@@ -280,7 +280,7 @@ Para que la comparación sea justa se configuró la misma arquitectura en ambos 
 Cómputo & 2 VM de 2 vCPU y 8 GiB, con disco de 64 GB cada una & 4 VM de 2 vCPU y 8 GiB (promedio del Auto Scaling)\\
 \rowcolor{rowgray} Objetos & 500 GB; 0,2 M escrituras y 2 M lecturas al mes & 2.000 GB; 0,8 M escrituras y 8 M lecturas al mes\\
 Base de datos & PostgreSQL de 2 vCPU y 8 GiB con réplica en otra zona; 128 GB & PostgreSQL de 4 vCPU y 16 GiB con réplica en otra zona; 256 GB\\
-\rowcolor{rowgray} Respaldos & 64 GB de respaldo de la base sobre lo incluido; 40 GB de snapshots de VM & 128 GB de respaldo de la base; 80 GB de snapshots de VM\\
+\rowcolor{rowgray} Respaldos & 64 GB de respaldo de la base sobre lo incluido; snapshot diario de cada VM (1 GB de cambio al día) & 128 GB de respaldo de la base; snapshot diario de las 4 VM\\
 Transferencia & 150 GB de salida a Internet al mes & 600 GB de salida a Internet al mes\\
 \bottomrule
 \end{tabularx}
@@ -289,19 +289,19 @@ Transferencia & 150 GB de salida a Internet al mes & 600 GB de salida a Internet
 \subsection{Matriz comparativa 2: escenario actual}
 \begin{table}[H]
 \centering\footnotesize
-\caption{Matriz comparativa 2, escenario actual (USD/mes, 10-11-2026).}\label{tab:m2a}
+\caption{Matriz comparativa 2, escenario actual (USD/mes, 10-11-2026). Estimaciones en el Anexo~\ref{anx:calculadoras}.}\label{tab:m2a}
 \begin{tabularx}{\linewidth}{L{3.2cm}R{1.55cm}R{1.55cm}Y}
 \toprule
 \textbf{Concepto} & \textbf{AWS} & \textbf{Azure} & \textbf{Supuesto / fuente (región, cantidad y tarifa)}\\
 \midrule
 Cómputo (VM) & 165,28 & 177,22 & 2 × 730 h. AWS: \texttt{m7i.large} a 0,10584/h más EBS gp3 a 0,084/GB-mes. Azure: \texttt{D2s v5} a 0,106/h más P6 a 11,23/disco-mes.\\
-\rowcolor{rowgray} Almacenamiento de objetos & 13,97 & 16,55 & 500 GB. S3 Standard a 0,02415/GB; Blob caliente ZRS a 0,0286/GB; más solicitudes.\\
+\rowcolor{rowgray} Almacenamiento de objetos & 13,97 & 16,56 & 500 GB. S3 Standard a 0,02415/GB; Blob caliente ZRS a 0,0286/GB; más solicitudes.\\
 Base de datos administrada & 287,94 & 318,25 & RDS \texttt{db.m7g.large} Multi-AZ a 0,352/h más 128 GB a 0,242. Flexible GP 2 vCore × 2 (HA) a 0,0979/vCore-h más 128 GB × 2 a 0,1265.\\
-\rowcolor{rowgray} Backups y snapshots & 8,52 & 29,67 & AWS: 64 GB × 0,10 más 40 GB × 0,053. Azure: 64 GB × 0,1045, 2 VM protegidas × 11,00 y 40 GB × 0,02464.\\
+\rowcolor{rowgray} Backups y snapshots & 14,77 & 39,66 & AWS: 64 GB × 0,10 más snapshots diarios de EBS, 158 GB-mes × 0,053. Azure: 64 GB × 2 (HA) × 0,1045, 2 VM protegidas × 11,00, 166,4 GB × 0,02464 y 1,28 GB × 0,145.\\
 Transferencia de datos & 13,50 & 13,05 & 150 GB de salida. AWS 0,09/GB; Azure 0,087/GB.\\
 \midrule
-\textbf{TOTAL mensual} & \textbf{489,20} & \textbf{554,75} & Azure cuesta 13,4\,\% más.\\
-\textbf{TOTAL anual} & \textbf{5.870,39} & \textbf{6.656,95} & \(12 \times\) total mensual. Costo por cuenta: \usd{2,45} (AWS) y \usd{2,77} (Azure) al mes.\\
+\textbf{TOTAL mensual} & \textbf{495,45} & \textbf{564,73} & Azure, +14,0\,\%. Calculadoras: 495,45 y 556,03 + 8,70.\\
+\textbf{TOTAL anual} & \textbf{5.945,40} & \textbf{6.776,76} & \(12 \times\) total mensual. Costo por cuenta: \usd{2,48} (AWS) y \usd{2,82} (Azure) al mes.\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -309,7 +309,7 @@ Transferencia de datos & 13,50 & 13,05 & 150 GB de salida. AWS 0,09/GB; Azure 0,
 \subsection{Matriz comparativa 2: escenario de expansión a cuatro estados}
 \begin{table}[H]
 \centering\footnotesize
-\caption{Matriz comparativa 2, escenario de expansión (USD/mes, 10-11-2026).}\label{tab:m2b}
+\caption{Matriz comparativa 2, escenario de expansión (USD/mes, 10-11-2026). Estimaciones en el Anexo~\ref{anx:calculadoras}.}\label{tab:m2b}
 \begin{tabularx}{\linewidth}{L{3.2cm}R{1.55cm}R{1.55cm}Y}
 \toprule
 \textbf{Concepto} & \textbf{AWS} & \textbf{Azure} & \textbf{Supuesto / fuente (región, cantidad y tarifa)}\\
@@ -317,17 +317,17 @@ Transferencia de datos & 13,50 & 13,05 & 150 GB de salida. AWS 0,09/GB; Azure 0,
 Cómputo (VM) & 330,56 & 354,43 & 4 × 730 h, con las mismas tarifas del escenario actual.\\
 \rowcolor{rowgray} Almacenamiento de objetos & 55,86 & 66,22 & 2.000 GB, 0,8 M escrituras y 8 M lecturas.\\
 Base de datos administrada & 575,87 & 636,50 & RDS \texttt{db.m7g.xlarge} Multi-AZ a 0,704/h más 256 GB. Flexible GP 4 vCore × 2 (HA) más 256 GB × 2.\\
-\rowcolor{rowgray} Backups y snapshots & 17,04 & 59,35 & 128 GB de respaldo de la base y 80 GB de snapshots. Azure: 4 VM protegidas × 11,00.\\
+\rowcolor{rowgray} Backups y snapshots & 29,55 & 79,32 & AWS: 128 GB de respaldo de la base y 316 GB-mes de snapshots. Azure: 128 GB × 2 (HA), 4 VM protegidas × 11,00, 332,8 GB y 2,56 GB.\\
 Transferencia de datos & 54,00 & 52,20 & 600 GB de salida.\\
 \midrule
-\textbf{TOTAL mensual} & \textbf{1.033,33} & \textbf{1.168,70} & Azure cuesta 13,1\,\% más.\\
-\textbf{TOTAL anual} & \textbf{12.399,95} & \textbf{14.024,42} & Ambos bajo el techo de \usd{15.000} al año. Costo por cuenta: \usd{1,72} y \usd{1,95} al mes.\\
+\textbf{TOTAL mensual} & \textbf{1.045,84} & \textbf{1.188,68} & Azure, +13,7\,\%. Calculadoras: 1.045,83 y 1.179,98 + 8,70.\\
+\textbf{TOTAL anual} & \textbf{12.550,08} & \textbf{14.264,16} & Ambos bajo el techo de \usd{15.000} al año. Costo por cuenta: \usd{1,74} y \usd{1,98} al mes.\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
 \subsection{Costos omitidos y sensibilidad}
-Las matrices cubren las cinco categorías que pide el enunciado. Quedan fuera, en ambos proveedores, el balanceador de carga y el firewall de aplicaciones (en AWS el ALB parte en 0,0236 USD/h, unos \usd{17} al mes más capacidad), la VPN de la migración, las IP públicas, el monitoreo y los registros, el servicio de claves, el plan de soporte, la copia de respaldos en una segunda región y el IVA. Como supuesto, el grupo estima que estos elementos suman entre 20\,\% y 30\,\% sobre el total; aun así, el escenario de expansión en AWS (\(12.400 \times 1{,}3 \approx\) \usd{16.100}) quedaría cerca del techo de presupuesto, que habría que revisar.
+Las matrices cubren las cinco categorías que pide el enunciado. Quedan fuera, en ambos proveedores, el balanceador de carga y el firewall de aplicaciones (en AWS el ALB parte en 0,0236 USD/h, unos \usd{17} al mes más capacidad), la VPN de la migración, las IP públicas, el monitoreo y los registros, el servicio de claves, el plan de soporte, la copia de respaldos en una segunda región y el IVA. Como supuesto, el grupo estima que estos elementos suman entre 20\,\% y 30\,\% sobre el total; aun así, el escenario de expansión en AWS (\(12.550 \times 1{,}3 \approx\) \usd{16.300}) quedaría cerca del techo de presupuesto, que habría que revisar.
 
 \begin{figure}[H]
 \centering
@@ -335,7 +335,7 @@ Las matrices cubren las cinco categorías que pide el enunciado. Quedan fuera, e
 \caption{Costo mensual por escenario y modalidad de cobro (USD, 10-11-2026).}\label{fig:costos}
 \end{figure}
 
-\textbf{Sensibilidad.} Si VAR se compromete por un año con el cómputo y la base de datos (AWS Reserved Instances sin pago inicial y Azure Reservations), la diferencia casi desaparece: \usd{377,76} frente a \usd{380,96} en el escenario actual y \usd{810,45} frente a \usd{821,11} en la expansión (figura~\ref{fig:costos}). Azure descuenta más al reservar (entre 38\,\% y 40\,\%, contra 23\,\% a 34\,\% en AWS). Por eso el costo por sí solo no decide la recomendación: a mediano plazo pesan más la continuidad y el ajuste operativo (sección~\ref{sec:recomendacion}).
+\textbf{Sensibilidad.} Si VAR se compromete por un año con el cómputo y la base de datos (AWS Reserved Instances sin pago inicial y Azure Reservations), la diferencia casi desaparece: \usd{384,01} frente a \usd{390,94} en el escenario actual y \usd{822,96} frente a \usd{841,09} en la expansión (figura~\ref{fig:costos}). Azure descuenta más al reservar (entre 38\,\% y 40\,\%, contra 23\,\% a 34\,\% en AWS). Por eso el costo por sí solo no decide la recomendación: a mediano plazo pesan más la continuidad y el ajuste operativo (sección~\ref{sec:recomendacion}).
 
 % =====================================================================
 \section{Arquitectura y recomendación}\label{sec:recomendacion}
@@ -351,7 +351,7 @@ Se ponderaron cinco criterios que se desprenden del caso. El puntaje va de 1 a 5
 \textbf{Criterio} & \textbf{Peso} & \textbf{AWS} & \textbf{Azure} & \textbf{Evidencia}\\
 \midrule
 Seguridad & 25\,\% & 5 & 5 & Cifrado por defecto, claves propias, MFA y servicios de detección equivalentes en ambos.\\
-\rowcolor{rowgray} Costo & 25\,\% & 5 & 4 & AWS cuesta 13\,\% menos pagando por uso; con reservas la diferencia baja a 1\,\%.\\
+\rowcolor{rowgray} Costo & 25\,\% & 5 & 4 & AWS cuesta 12--14\,\% menos pagando por uso; con reservas la diferencia baja a 2\,\%.\\
 Rendimiento y disponibilidad & 20\,\% & 4 & 5 & SLA de la base: 99,95\,\% en RDS Multi-AZ y 99,99\,\% en Flexible Server con HA de zona.\\
 \rowcolor{rowgray} Crecimiento & 15\,\% & 5 & 4 & 3 zonas en ambas regiones; 15 réplicas de lectura en RDS y 5 en Flexible Server.\\
 Continuidad ante desastre regional & 15\,\% & 5 & 3 & AWS Backup copia a otra región; Mexico Central no tiene par para el geo-respaldo de PostgreSQL.\\
@@ -375,14 +375,14 @@ Se recomienda \textbf{AWS en la región México Central (\texttt{mx-central-1}) 
 \textbf{Justificación por criterio.}
 \begin{itemize}
   \item \textbf{Seguridad:} todo cifrado con claves de KMS que controla VAR, sin servidores expuestos a Internet, con mínimo privilegio y detección continua (GuardDuty y Security Hub), siguiendo el pilar de seguridad del Well-Architected Framework \parencite{aws-waf}.
-  \item \textbf{Costo:} es la opción más barata pagando por uso en los dos escenarios (\usd{5.870} y \usd{12.400} al año) y su costo por cuenta baja de \usd{2,45} a \usd{1,72} al mes con la expansión, lo que muestra economía de escala.
+  \item \textbf{Costo:} es la opción más barata pagando por uso en los dos escenarios (\usd{5.945} y \usd{12.550} al año) y su costo por cuenta baja de \usd{2,48} a \usd{1,74} al mes con la expansión, lo que muestra economía de escala.
   \item \textbf{Rendimiento:} la región está en Querétaro, uno de los estados de la expansión, a pocos cientos de kilómetros de las otras cuatro entidades. La carga transaccional usa menos del 5\,\% de la capacidad de la base.
   \item \textbf{Crecimiento:} pasar de 50 a 110 empleados y de 200 a 600 cuentas solo exige cambiar parámetros (instancias deseadas, tamaño de la base y réplicas), sin migrar de nuevo.
 \end{itemize}
 
 \textbf{Disponibilidad compuesta.} Multiplicando los SLA publicados del camino transaccional (balanceador 99,99\,\%, EC2 en varias zonas 99,99\,\% y RDS Multi-AZ 99,95\,\%), la disponibilidad compuesta es de 99,93\,\%, sobre la meta de 99,9\,\% \parencite{aws-sla-elb,aws-sla-compute,aws-sla-rds}. Si S3 (99,9\,\%) estuviera en ese camino, bajaría a 99,83\,\%. Por eso la aplicación registra y confirma cada transacción sin depender de S3, y los documentos se generan y suben de forma asíncrona, con reintentos.
 
-\textbf{Ventajas y desventajas.} A favor de AWS: menor costo por uso, copia de respaldos entre regiones disponible para una región sin par, más réplicas de lectura y un ecosistema de migración maduro (DMS y DataSync). En contra: el SLA de la base es menor (99,95\,\% frente a 99,99\,\%), los respaldos de la base cuestan aparte y Azure se integraría mejor si VAR adoptara Microsoft 365. En costo-beneficio, AWS entrega la misma arquitectura por \usd{786} menos al año hoy y \usd{1.624} menos en la expansión, y cubre el riesgo de desastre regional que Azure no resuelve de forma nativa en México.
+\textbf{Ventajas y desventajas.} A favor de AWS: menor costo por uso, copia de respaldos entre regiones disponible para una región sin par, más réplicas de lectura y un ecosistema de migración maduro (DMS y DataSync). En contra: el SLA de la base es menor (99,95\,\% frente a 99,99\,\%), los respaldos de la base cuestan aparte y Azure se integraría mejor si VAR adoptara Microsoft 365. En costo-beneficio, AWS entrega la misma arquitectura por \usd{831} menos al año hoy y \usd{1.714} menos en la expansión, y cubre el riesgo de desastre regional que Azure no resuelve de forma nativa en México.
 
 % =====================================================================
 \section{Plan de implementación}\label{sec:implementacion}
@@ -538,23 +538,24 @@ Hallazgos críticos abiertos & N.º de hallazgos críticos de seguridad con más
 % =====================================================================
 \section{Conclusión}\label{sec:conclusion}
 % =====================================================================
-\textbf{¿Qué solución recomendamos a VAR para operar hoy y crecer a cuatro estados?} Una sola nube, \textbf{AWS en la región México Central}, con aplicación en EC2 en varias zonas y Auto Scaling, documentos en S3 con versionado y bloqueo, y PostgreSQL en RDS Multi-AZ, todo cifrado con claves propias y con copias de respaldo en una segunda región. Con esta arquitectura, VAR pasa de un servidor sin respaldo externo a una plataforma con 99,93\,\% de disponibilidad compuesta, RPO de 15 minutos y RTO de 4 horas, por \usd{489} al mes hoy y \usd{1.033} en la expansión. Con la expansión, además, el costo por cuenta baja un 30\,\%. La expansión no exige otra migración: basta con cambiar parámetros de capacidad.
+\textbf{¿Qué solución recomendamos a VAR para operar hoy y crecer a cuatro estados?} Una sola nube, \textbf{AWS en la región México Central}, con aplicación en EC2 en varias zonas y Auto Scaling, documentos en S3 con versionado y bloqueo, y PostgreSQL en RDS Multi-AZ, todo cifrado con claves propias y con copias de respaldo en una segunda región. Con esta arquitectura, VAR pasa de un servidor sin respaldo externo a una plataforma con 99,93\,\% de disponibilidad compuesta, RPO de 15 minutos y RTO de 4 horas, por \usd{495} al mes hoy y \usd{1.046} en la expansión. Con la expansión, además, el costo por cuenta baja un 30\,\%.
 
 \textbf{¿Bajo qué supuestos cambiaría la recomendación?}
 \begin{itemize}
-  \item \textbf{Si VAR fuera una empresa Microsoft} (Microsoft 365 y Entra ID, o licencias de Windows Server o SQL Server con Software Assurance), Azure ganaría: el Azure Hybrid Benefit y la integración de identidades compensan la diferencia de costo, que con reservas a un año ya es de solo 1\,\%.
+  \item \textbf{Si VAR fuera una empresa Microsoft} (Microsoft 365 y Entra ID, o licencias de Windows Server o SQL Server con Software Assurance), Azure ganaría: el Azure Hybrid Benefit y la integración de identidades compensan la diferencia de costo, que con reservas a un año ya es de solo 2\,\%.
   \item \textbf{Si la aplicación usara SQL Server}, Azure SQL Database pasaría a ser el par natural y evitaría migrar el motor.
   \item \textbf{Si la gerencia exigiera que ninguna copia salga de México}, la ventaja de AWS en continuidad desaparece, porque ambos proveedores tienen una sola región en el país. Pesarían entonces el SLA de 99,99\,\% de la base en Azure y el costo con reservas.
   \item \textbf{Si el volumen creciera un orden de magnitud} (millones de transacciones al mes), habría que reevaluar los motores (Aurora o Hyperscale), pero la elección de proveedor no cambia por eso.
 \end{itemize}
 
+\enlargethispage{2\baselineskip}
 La lección del análisis es que, a esta escala, la diferencia de precio entre AWS y Azure es pequeña y casi desaparece al reservar. Lo que inclina la decisión son las restricciones del caso: una región sin par en Azure, un equipo de TI chico y el ecosistema que VAR ya usa. Si cambia alguno de esos supuestos, la recomendación debe revisarse con la misma matriz.
 
 % =====================================================================
 \section*{Declaración de uso de inteligencia artificial}
 \addcontentsline{toc}{section}{Declaración de uso de inteligencia artificial}
 % =====================================================================
-El grupo usó \textbf{Claude} (Anthropic, modelo Claude Opus 5.5, mediante Claude Code) como asistente para estructurar el informe según la rúbrica, redactar borradores de las secciones, escribir los scripts que descargaron las tarifas de las interfaces oficiales de precios de AWS y Azure, generar la planilla de costos, los diagramas en TikZ, la presentación y el guion. \textbf{Cómo se verificó:} (1) cada tarifa se volvió a consultar en la AWS Price List API y en la Azure Retail Prices API para las regiones \texttt{mx-central-1} y \emph{Mexico Central} el 10 de noviembre de 2026, y los totales se recalcularon con las fórmulas de la planilla; (2) se revisó que cada enlace de la bibliografía funcionara y que los datos técnicos citados (SLA, límites, réplicas y retención) aparecieran en la página oficial correspondiente; (3) los supuestos, la recomendación y la conclusión fueron discutidos y validados por los cinco integrantes, que pueden explicarlos en la defensa. La responsabilidad por el contenido es del grupo.
+El grupo usó \textbf{Claude} (Anthropic, modelo Claude Opus 5.5, mediante Claude Code) como apoyo en cuatro frentes: (1) la \textbf{redacción}, para estructurar el informe según la rúbrica y escribir borradores de las secciones; (2) los \textbf{cálculos}, con scripts que descargaron las tarifas de las interfaces oficiales de precios, la planilla de costos y el armado de las estimaciones en AWS Pricing Calculator y Azure Pricing Calculator; (3) los \textbf{diagramas} en TikZ, y (4) la \textbf{presentación} y el guion de la defensa. \textbf{Cómo se verificó el contenido generado:} las tarifas unitarias de la planilla se contrastaron el 10 de noviembre de 2026 con las que muestran las dos calculadoras oficiales y los totales se recalcularon con las fórmulas de la planilla (Anexo~\ref{anx:calculadoras}); ese mismo día se abrieron todos los enlaces de las referencias, y los dos de la Cámara de Diputados de México, que no cargaban desde Chile, se reemplazaron por la versión del Orden Jurídico Nacional. El grupo revisó y validó el contenido, que es de su responsabilidad, y cada integrante debe poder explicarlo en la defensa.
 
 % =====================================================================
 \printbibliography[heading=bibintoc, title={Referencias}]
@@ -567,7 +568,7 @@ El grupo usó \textbf{Claude} (Anthropic, modelo Claude Opus 5.5, mediante Claud
 % =====================================================================
 \begin{table}[H]
 \centering\footnotesize
-\caption{Tarifas unitarias de lista, pago por uso, consultadas el 10-11-2026.}\label{tab:tarifas}
+\caption{Tarifas unitarias de lista, pago por uso, consultadas el 10-11-2026 y contrastadas con las calculadoras oficiales.}\label{tab:tarifas}
 \begin{tabularx}{\linewidth}{YR{1.7cm}L{2.5cm}}
 \toprule
 \textbf{Concepto (región)} & \textbf{USD} & \textbf{Unidad}\\
@@ -596,6 +597,7 @@ PostgreSQL Flexible, almacenamiento & 0,1265 & GB-mes\\
 PostgreSQL Flexible, respaldo LRS adicional & 0,1045 & GB-mes\\
 Azure Backup, VM protegida (50–500 GB) & 11,00 & instancia-mes\\
 Azure Backup, almacenamiento LRS & 0,02464 & GB-mes\\
+Azure Backup, instantáneas (tarifa que aplica la calculadora) & 0,145 & GB-mes\\
 Transferencia de salida a Internet (red de Microsoft) & 0,087 & GB\\
 \midrule
 \multicolumn{3}{l}{\textbf{Reservas de 1 año (sensibilidad)}}\\
@@ -638,10 +640,11 @@ Base de datos administrada & AWS & 128 GB gp3 Multi-AZ & 128 GB-mes & 0,242 & 30
 Base de datos administrada & Azure & PostgreSQL Flexible GP 2 vCore, HA con redundancia de zona (×2) × 730 h & 2.920 vCore-h & 0,0979 & 285,87\\
 Base de datos administrada & Azure & 128 GB de almacenamiento (×2 por HA) & 256 GB-mes & 0,1265 & 32,38\\
 Backups y snapshots & AWS & 64 GB de respaldo RDS sobre lo incluido & 64 GB-mes & 0,10 & 6,40\\
-Backups y snapshots & AWS & 40 GB de snapshots EBS incrementales & 40 GB-mes & 0,053 & 2,12\\
-Backups y snapshots & Azure & 64 GB de respaldo PostgreSQL sobre lo incluido & 64 GB-mes & 0,1045 & 6,69\\
+Backups y snapshots & AWS & Snapshots EBS diarios: 2 × (64 GB + 30 × 1 GB × 0,5) & 158 GB-mes & 0,053 & 8,37\\
+Backups y snapshots & Azure & 64 GB de respaldo PostgreSQL × 2 (HA) & 128 GB-mes & 0,1045 & 13,38\\
 Backups y snapshots & Azure & Azure Backup: 2 VM protegidas & 2 instancia-mes & 11,00 & 22,00\\
-Backups y snapshots & Azure & Azure Backup: 40 GB en almacén LRS & 40 GB-mes & 0,02464 & 0,99\\
+Backups y snapshots & Azure & Azure Backup: promedio en almacén LRS & 166,4 GB-mes & 0,02464 & 4,10\\
+Backups y snapshots & Azure & Azure Backup: instantáneas de restauración & 1,28 GB-mes & 0,145 & 0,19\\
 Transferencia de datos & AWS & 150 GB de salida a Internet & 150 GB & 0,09 & 13,50\\
 Transferencia de datos & Azure & 150 GB de salida a Internet & 150 GB & 0,087 & 13,05\\
 \midrule\multicolumn{6}{l}{\textbf{Escenario de expansión}}\\\midrule
@@ -660,22 +663,61 @@ Base de datos administrada & AWS & 256 GB gp3 Multi-AZ & 256 GB-mes & 0,242 & 61
 Base de datos administrada & Azure & PostgreSQL Flexible GP 4 vCore, HA con redundancia de zona (×2) × 730 h & 5.840 vCore-h & 0,0979 & 571,74\\
 Base de datos administrada & Azure & 256 GB de almacenamiento (×2 por HA) & 512 GB-mes & 0,1265 & 64,77\\
 Backups y snapshots & AWS & 128 GB de respaldo RDS sobre lo incluido & 128 GB-mes & 0,10 & 12,80\\
-Backups y snapshots & AWS & 80 GB de snapshots EBS incrementales & 80 GB-mes & 0,053 & 4,24\\
-Backups y snapshots & Azure & 128 GB de respaldo PostgreSQL sobre lo incluido & 128 GB-mes & 0,1045 & 13,38\\
+Backups y snapshots & AWS & Snapshots EBS diarios: 4 × (64 GB + 30 × 1 GB × 0,5) & 316 GB-mes & 0,053 & 16,75\\
+Backups y snapshots & Azure & 128 GB de respaldo PostgreSQL × 2 (HA) & 256 GB-mes & 0,1045 & 26,75\\
 Backups y snapshots & Azure & Azure Backup: 4 VM protegidas & 4 instancia-mes & 11,00 & 44,00\\
-Backups y snapshots & Azure & Azure Backup: 80 GB en almacén LRS & 80 GB-mes & 0,02464 & 1,97\\
+Backups y snapshots & Azure & Azure Backup: promedio en almacén LRS & 332,8 GB-mes & 0,02464 & 8,20\\
+Backups y snapshots & Azure & Azure Backup: instantáneas de restauración & 2,56 GB-mes & 0,145 & 0,37\\
 Transferencia de datos & AWS & 600 GB de salida a Internet & 600 GB & 0,09 & 54,00\\
 Transferencia de datos & Azure & 600 GB de salida a Internet & 600 GB & 0,087 & 52,20\\
 \end{longtable}
 \endgroup
 
-\section{Anexo: reproducción en las calculadoras oficiales}\label{anx:calculadoras}
-Las tarifas provienen de las interfaces públicas de precios que alimentan las calculadoras. Para reproducir cada estimación sin iniciar sesión:
+\section{Anexo: estimaciones en las calculadoras oficiales}\label{anx:calculadoras}
+Las dos configuraciones se armaron el 10 de noviembre de 2026 en las calculadoras oficiales, sin iniciar sesión, en USD y pagando por uso (tabla~\ref{tab:calc}). AWS Pricing Calculator permite publicar la estimación con un enlace público de solo lectura, que AWS mantiene durante un año. Azure Pricing Calculator exige iniciar sesión para guardar o compartir; como el enunciado no pide crear cuentas, se usó la alternativa sin cuenta: capturas de la estimación (figuras~\ref{fig:calc-az-a} y~\ref{fig:calc-az-b}). Las capturas completas van en la carpeta \emph{Evidencias calculadoras} de la entrega.
 
-\textbf{AWS Pricing Calculator} (\url{https://calculator.aws/}): \emph{Create estimate}, región \emph{Mexico (Central)}. (1) \emph{Amazon EC2}: Linux, \texttt{m7i.large}, 2 instancias (4 en la expansión), uso constante de 730 h, On-Demand, EBS gp3 de 64 GB. (2) \emph{Amazon S3}: S3 Standard, 500 GB (2.000 GB), 200.000 PUT (800.000) y 2.000.000 GET (8.000.000). (3) \emph{Amazon RDS for PostgreSQL}: \texttt{db.m7g.large} (\texttt{db.m7g.xlarge}), Multi-AZ, On-Demand, 128 GB (256 GB) gp3, 64 GB (128 GB) de respaldo adicional. (4) \emph{Data Transfer}: 150 GB (600 GB) de salida a Internet. Guardar con \emph{Share} para obtener el enlace público de la estimación.
+\begin{table}[H]
+\centering\footnotesize
+\caption{Totales de las calculadoras oficiales y conciliación con la Matriz 2 (USD/mes, 10-11-2026).}\label{tab:calc}
+\begin{tabularx}{\linewidth}{L{1.5cm}L{1.6cm}R{1.8cm}R{1.2cm}R{1.6cm}Y}
+\toprule
+\textbf{Proveedor} & \textbf{Escenario} & \textbf{Calculadora} & \textbf{Ajuste} & \textbf{Matriz 2} & \textbf{Enlace o evidencia}\\
+\midrule
+AWS & Actual & 495,45 & -- & 495,45 & \url{https://calculator.aws/\#/estimate?id=29528f0ed01238d8fbe2b654a022153c9da3a295}\\
+\rowcolor{rowgray} AWS & Expansión & 1.045,83 & -- & 1.045,84 & \url{https://calculator.aws/\#/estimate?id=6d5b6a76d4c17116cb59ca8601950feea26ce12b}\\
+Azure & Actual & 556,03 & + 8,70 & 564,73 & Figura~\ref{fig:calc-az-a}\\
+\rowcolor{rowgray} Azure & Expansión & 1.179,98 & + 8,70 & 1.188,68 & Figura~\ref{fig:calc-az-b}\\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\textbf{Azure Pricing Calculator} (\url{https://azure.microsoft.com/pricing/calculator/}): región \emph{Mexico Central}, moneda USD, \emph{Pay as you go}. (1) \emph{Virtual Machines}: Linux, \texttt{D2s v5}, 2 (4) VM, 730 h, disco P6. (2) \emph{Storage Accounts}: Block Blob, Standard, Hot, ZRS, 500 GB (2.000 GB) y las operaciones indicadas. (3) \emph{Azure Database for PostgreSQL}: Flexible Server, General Purpose, \texttt{D2ds v5} (\texttt{D4ds v5}), alta disponibilidad con redundancia de zona, 128 GB (256 GB). (4) \emph{Backup}: 2 (4) VM y su almacenamiento LRS. (5) \emph{Bandwidth}: 150 GB (600 GB) de salida. Exportar o compartir la estimación.
+\textbf{Conciliación.} (1) Azure Pricing Calculator descuenta de forma automática los primeros 100 GB de salida a Internet (cobra 4,35 y 43,50 en lugar de 13,05 y 52,20). Como el enunciado excluye las capas gratuitas, la Matriz 2 suma esos 100 GB × 0,087 = \usd{8,70}. (2) La diferencia de 0,01 en la expansión de AWS se debe a que la calculadora redondea por servicio y la planilla redondea solo el total. (3) Cada tarifa unitaria de la planilla coincide con la que muestra la calculadora; las fórmulas de snapshots de EBS y de Azure Backup siguen el modelo de cada calculadora.
 
-\textbf{Consulta directa a las API (verificable).} AWS: \url{https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json} (y \texttt{AmazonRDS}, \texttt{AmazonS3} y \texttt{AWSDataTransfer}), archivo de \texttt{mx-central-1}. Azure: \url{https://prices.azure.com/api/retail/prices} con el filtro \texttt{armRegionName eq 'mexicocentral'} y el nombre del servicio. La planilla \emph{Planilla de costos - AWS vs Azure.xlsx} contiene todas las tarifas con su fuente y las fórmulas de los dos escenarios.
+\textbf{Configuración en AWS} (región \emph{Mexico (Central)}; entre paréntesis, la expansión). (1) \emph{Amazon EC2}: Linux, \texttt{m7i.large}, 2 (4) instancias, uso constante, On-Demand, EBS gp3 de 64 GB y snapshot diario con 1 GB de cambio. (2) \emph{Amazon S3}: S3 Standard, 500 GB (2.000 GB), 200.000 PUT (800.000), 2.000.000 GET (8.000.000) y 150 GB (600 GB) de salida a Internet. (3) \emph{Amazon RDS for PostgreSQL}: \texttt{db.m7g.large} (\texttt{db.m7g.xlarge}), Multi-AZ, On-Demand, gp3 de 128 GB (256 GB) y 64 GB (128 GB) de respaldo adicional, sin RDS Proxy ni Database Insights.
+
+\textbf{Configuración en Azure} (región \emph{Mexico Central}, USD, pago por uso). (1) \emph{Virtual Machines}: Linux (Ubuntu), \texttt{D2s v5}, 2 (4) VM, 730 h y 2 (4) discos Premium SSD P6. (2) \emph{Cuentas de almacenamiento}: blobs en bloque, Estándar, GPv2, nivel de acceso frecuente, ZRS, 500 GB (2.000 GB), 20 (80) × 10.000 escrituras y 200 (800) × 10.000 lecturas. (3) \emph{Azure Database for PostgreSQL}: servidor flexible, uso general, \texttt{D2ds v5} (\texttt{D4ds v5}), alta disponibilidad, SSD Premium de 128 GiB (256 GiB) y 64 GiB (128 GiB) de respaldo adicional. (4) \emph{Azure Backup}: VM de Azure, directiva estándar, 2 (4) instancias de 64 GB, retención diaria de 30 días, cambio diario bajo, LRS. (5) \emph{Ancho de banda}: salida a Internet desde Mexico Central por la red de Microsoft, 150 GB (600 GB).
+
+\textbf{Consulta directa a las API (verificable).} AWS: \url{https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/AmazonEC2/current/region_index.json} (y \texttt{AmazonRDS}, \texttt{AmazonS3} y \texttt{AWSDataTransfer}), archivo de \texttt{mx-central-1}. Azure: \url{https://prices.azure.com/api/retail/prices} con el filtro \texttt{armRegionName eq 'mexicocentral'} y el nombre del servicio. La planilla \emph{Planilla de costos - AWS vs Azure.xlsx} contiene todas las tarifas con su fuente, las fórmulas de los dos escenarios y, en la hoja \emph{Calculadoras}, los enlaces y la conciliación.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\linewidth]{figuras/calculadoras/aws-actual.png}\\[6pt]
+\includegraphics[width=0.92\linewidth]{figuras/calculadoras/aws-expansion.png}
+\caption{AWS Pricing Calculator: escenario actual (arriba, 495,45 USD/mes) y de expansión (abajo, 1.045,83 USD/mes). Capturas del 10-11-2026.}\label{fig:calc-aws}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.74\linewidth]{figuras/calculadoras/azure-actual-1.jpg}\\[6pt]
+\includegraphics[width=0.74\linewidth]{figuras/calculadoras/azure-actual-3.jpg}
+\caption{Azure Pricing Calculator, escenario actual: detalle por producto (arriba) y total de 556,03 USD/mes (abajo). Capturas del 10-11-2026.}\label{fig:calc-az-a}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.74\linewidth]{figuras/calculadoras/azure-expansion-1.jpg}\\[6pt]
+\includegraphics[width=0.74\linewidth]{figuras/calculadoras/azure-expansion-3.jpg}
+\caption{Azure Pricing Calculator, escenario de expansión: detalle por producto (arriba) y total de 1.179,98 USD/mes (abajo). Capturas del 10-11-2026.}\label{fig:calc-az-b}
+\end{figure}
 
 \end{document}

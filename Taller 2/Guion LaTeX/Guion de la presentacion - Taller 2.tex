@@ -1,0 +1,116 @@
+% Guion de la defensa del Taller 2. Se compila con: latexmk -xelatex "Guion de la presentacion - Taller 2.tex"
+\documentclass[11pt]{article}
+\usepackage{fontspec}
+\IfFontExistsTF{Charter}{\setmainfont{Charter}}{\setmainfont{Latin Modern Roman}}
+\IfFontExistsTF{Avenir Next}{\setsansfont{Avenir Next}}{\setsansfont{Latin Modern Sans}}
+\usepackage[spanish,es-nodecimaldot,es-noshorthands]{babel}
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=2.2cm,right=2.2cm,headheight=14pt]{geometry}
+\usepackage[table]{xcolor}
+\usepackage{booktabs,tabularx,enumitem,fancyhdr,lastpage}
+\usepackage[most]{tcolorbox}
+\usepackage[hidelinks]{hyperref}
+\definecolor{navy}{HTML}{1F3A5F}
+\definecolor{awsorange}{HTML}{D9822B}
+\definecolor{boxbg}{HTML}{FBFBFC}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.45em}
+\pagestyle{fancy}\fancyhf{}
+\fancyhead[L]{\sffamily\footnotesize Taller 2 · Guion de la defensa · Grupo 6 · NRC 8485}
+\fancyfoot[C]{\sffamily\footnotesize \thepage/\pageref{LastPage}}
+\renewcommand{\headrulewidth}{0.4pt}
+
+\newtcolorbox{lamina}[2]{enhanced,breakable,colback=boxbg,colframe=navy,boxrule=0.5pt,arc=1.5pt,
+  left=8pt,right=8pt,top=6pt,bottom=6pt,fonttitle=\sffamily\bfseries,
+  title={#1\hfill\normalfont\sffamily #2},before skip=8pt,after skip=6pt}
+\newcommand{\pregunta}[2]{\par{\color{awsorange}\sffamily\bfseries\small Pregunta probable:} {\small\itshape #1}\par
+  \vspace{-0.3em}{\small\textbf{Respuesta:} #2}}
+
+\begin{document}
+\begin{center}
+{\sffamily\bfseries\color{awsorange} TALLER PRÁCTICO 2 · INFRAESTRUCTURA TI\par}
+\vspace{2pt}
+{\sffamily\bfseries\color{navy}\LARGE Guion de la defensa: VAR sube a la nube\par}
+\vspace{2pt}
+{\sffamily Grupo 6 · NRC 8485 · Docente: Eduardo Correa Marchant\par}
+\end{center}
+
+\textbf{Cómo usarlo.} La presentación (\texttt{Entrega2\_GRUPO6\_NRC8485.html}) se abre en el navegador: flechas para avanzar, \textbf{F} para pantalla completa y \textbf{N} para ver estas notas en pantalla. También va exportada a PDF (\texttt{Entrega2\_GRUPO6\_NRC8485 - Presentacion.pdf}) por si el computador de la sala no la abre. Son 11 láminas y 10 minutos. Cada integrante habla unos 2 minutos. El texto está pensado para decirlo con sus palabras, no para leerlo: lo importante son las cifras en negrita.
+
+{\small
+\begin{tabularx}{\linewidth}{@{}lXcc@{}}
+\toprule
+\textbf{Integrante} & \textbf{Bloque} & \textbf{Láminas} & \textbf{Tiempo}\\
+\midrule
+Benjamín Peña & Apertura, caso y supuestos; cierre & 1--2 y 11 & 0:00--1:30 y 9:30--10:00\\
+Francisco Morales & Comparación de servicios (Matriz 1) & 3--4 & 1:30--3:30\\
+Martín Burgos & Costos en dos escenarios (Matriz 2) & 5--6 & 3:30--5:30\\
+Julián Pacheco & Arquitectura y recomendación & 7--8 & 5:30--7:30\\
+Matías Muñoz & Migración, riesgos y continuidad & 9--10 & 7:30--9:30\\
+\bottomrule
+\end{tabularx}}
+
+El reparto sigue los tiempos orientativos del enunciado (supuestos al inicio, servicios, costos, arquitectura, migración y riesgos, y cierre).
+
+\begin{lamina}{1 · Portada}{Benjamín · 0:00--0:40}
+Buenos días. Somos el Grupo 6: Francisco, Julián, Martín, Matías y yo, Benjamín. Les presentamos la propuesta de infraestructura cloud para VAR, una empresa con \textbf{50 empleados y 200 cuentas} que quiere crecer a \textbf{cuatro estados}. Comparamos AWS y Azure con documentación y calculadoras oficiales y llegamos a una recomendación concreta.
+\end{lamina}
+
+\begin{lamina}{2 · El caso y los supuestos}{Benjamín · 0:40--1:30}
+El caso no dice país, volúmenes ni presupuesto, así que los declaramos como supuestos. Elegimos \textbf{México}, porque tiene estados y porque las dos nubes tienen región en Querétaro. Hoy VAR opera en la CDMX y se expande a \textbf{Nuevo León, Jalisco, Querétaro y Puebla}. Los números pasan de 50 a 110 empleados, de 200 a 600 cuentas, de 0,45 a 2 TB y de 60 mil a 200 mil transacciones al mes. La meta es \textbf{99,9 \%} de disponibilidad, \textbf{RPO de 15 minutos} y \textbf{RTO de 4 horas}.
+\pregunta{¿Por qué México y no Chile?}{Porque el caso habla de «estados». México tiene estados y las dos nubes tienen región dentro del país, lo que permite comparar la residencia de datos en igualdad de condiciones.}
+\end{lamina}
+
+\begin{lamina}{3 · Tres pares de servicios}{Francisco · 1:30--2:30}
+Investigamos los seis servicios en la documentación oficial. En \textbf{cómputo}, EC2 y Azure VM son equivalentes: comparamos 2 vCPU y 8 GiB, y ambos dan \textbf{99,99 \%} solo si las máquinas están en dos o más zonas. En \textbf{objetos}, S3 y Blob Storage; para igualar a S3, en Azure hay que elegir redundancia de zona, ZRS. En \textbf{base de datos}, Azure SQL Database es solo SQL Server. Como VAR usa PostgreSQL, el par justo es \textbf{RDS for PostgreSQL contra Azure Database for PostgreSQL Flexible Server}, como permite el enunciado.
+\pregunta{¿Qué diferencia hay entre IaaS y PaaS aquí?}{En EC2 y en las VM, VAR administra el sistema operativo y los parches; en S3, Blob y las bases administradas, el proveedor opera el motor y VAR responde por los datos, los accesos y la configuración. Es el modelo de responsabilidad compartida.}
+\end{lamina}
+
+\begin{lamina}{4 · Las diferencias que importan}{Francisco · 2:30--3:30}
+Tres diferencias pesan para VAR. En disponibilidad de la base gana Azure: \textbf{99,99 \% contra 99,95 \%}. En crecimiento gana AWS: \textbf{15 réplicas de lectura contra 5}. La más importante: \textbf{Mexico Central no tiene región pareada}, y el respaldo geo-redundante de PostgreSQL en Azure solo funciona entre regiones pareadas. En AWS sí podemos copiar los respaldos a otra región. Eso decide la continuidad ante un desastre regional.
+\pregunta{¿De dónde sale lo de la región sin par?}{De la página oficial de Microsoft sobre pares de regiones, que lista Mexico Central sin par, y de la de respaldos de PostgreSQL Flexible, que limita el geo-respaldo a regiones pareadas. Ambas están citadas en el informe.}
+\end{lamina}
+
+\begin{lamina}{5 · Costos en dos escenarios}{Martín · 3:30--4:45}
+Los costos salen de las \textbf{calculadoras oficiales} de AWS y Azure, configuradas sin iniciar sesión, en las regiones de México, en dólares, el 10 de noviembre de 2026, pagando por uso y sin capas gratuitas. Configuramos la misma arquitectura en los dos proveedores. AWS cuesta \textbf{495 dólares al mes hoy y 1.046 en la expansión}; Azure, \textbf{565 y 1.189}. Azure sale un \textbf{14 \% más caro}, sobre todo por la base de datos con alta disponibilidad y porque cobra por cada máquina respaldada. Al año son \textbf{5.945 contra 6.777} hoy, y \textbf{12.550 contra 14.264} en la expansión.
+\pregunta{¿Cómo calcularon el total y dónde se puede verificar?}{Cada línea es cantidad por tarifa, con 730 horas al mes; el total mensual es la suma y el anual, doce veces el mensual. Las estimaciones de AWS tienen enlace público y las de Azure van en capturas, porque Azure pide iniciar sesión para compartir. Todo está en el anexo C del informe y en la planilla Excel, con la fuente de cada tarifa.}
+\end{lamina}
+
+\begin{lamina}{6 · Sensibilidad}{Martín · 4:45--5:30}
+Si VAR reserva por un año el cómputo y la base de datos, Azure descuenta más y la diferencia casi desaparece: \textbf{384 contra 391 dólares} hoy, menos de 2 \%. Además, hay costos fuera de la matriz en los dos proveedores: balanceador, VPN, monitoreo, soporte e IVA. Como supuesto, suman entre un \textbf{20 y un 30 \%}. Conclusión: el precio no decide, así que miramos el resto de los criterios.
+\pregunta{¿Por qué no usaron las capas gratuitas?}{Porque el enunciado lo prohíbe para producción. Por la misma razón, a la calculadora de Azure, que descuenta sola los primeros 100 GB de salida, le sumamos de vuelta esos 8,70 dólares al mes.}
+\end{lamina}
+
+\begin{lamina}{7 · Arquitectura}{Julián · 5:30--6:30}
+Todo vive en la región \textbf{México Central de AWS}, en Querétaro. Los usuarios entran por HTTPS a un balanceador con firewall de aplicaciones. Detrás hay instancias EC2 en dos zonas que crecen solas con Auto Scaling. La base es PostgreSQL en RDS con una réplica síncrona en otra zona. Los documentos van a S3, con versionado y bloqueo. Todo se cifra con claves de VAR, se accede con SSO y MFA, y los respaldos se copian cada día a una segunda región. En la expansión solo se activan la tercera zona y una réplica de lectura.
+\pregunta{¿Cómo acceden los empleados remotos?}{Por HTTPS a la aplicación, con inicio de sesión único y MFA. Los administradores entran con Systems Manager, sin abrir SSH a Internet. La VPN solo se usa durante la migración.}
+\end{lamina}
+
+\begin{lamina}{8 · Recomendación}{Julián · 6:30--7:30}
+Para decidir ponderamos cinco criterios. En seguridad empatan. En costo gana AWS y en disponibilidad de la base gana Azure. En crecimiento y, sobre todo, en continuidad ante un desastre regional gana AWS. El resultado es \textbf{4,80 contra 4,30}. Recomendamos \textbf{AWS como proveedor único}: con dos personas en TI, mantener dos nubes duplica el trabajo sin un beneficio claro. La disponibilidad compuesta del camino transaccional es de \textbf{99,93 \%}, sobre la meta de 99,9.
+\pregunta{¿Cómo calcularon el 99,93 \%?}{Multiplicando los SLA publicados del camino transaccional: balanceador 99,99, EC2 en varias zonas 99,99 y RDS Multi-AZ 99,95. S3 queda fuera de ese camino porque los documentos se suben de forma asíncrona; si estuviera dentro, bajaría a 99,83.}
+\end{lamina}
+
+\begin{lamina}{9 · Migración y cronograma}{Matías · 7:30--8:30}
+La migración es \textbf{por etapas y con replicación}, no de un golpe. Primero se copian los documentos con DataSync mientras VAR sigue operando. Después, la base se replica con DMS, de modo que la nube va solo segundos atrás. Hacemos un \textbf{piloto con 20 cuentas} y el corte un fin de semana, fuera del cierre de mes, con unos \textbf{30 minutos} de escrituras congeladas. Validamos con conteos de filas y sumas de montos. Son \textbf{16 semanas en seis fases}, y después se suma un estado por mes.
+\pregunta{¿Por qué 16 semanas?}{Porque el equipo de TI de VAR son dos personas (supuesto), el piloto necesita al menos un cierre de mes real y el corte no puede caer en un cierre. Las fases siguen el cronograma referencial del enunciado.}
+\end{lamina}
+
+\begin{lamina}{10 · Riesgos y continuidad}{Matías · 8:30--9:30}
+Identificamos \textbf{ocho riesgos}. El único alto es el \textbf{acceso indebido}, porque en la nube las identidades y los permisos son responsabilidad de VAR; lo mitigamos con SSO, MFA y mínimo privilegio. En continuidad: una falla de zona se resuelve en uno o dos minutos sin perder datos, y una corrupción se recupera a un punto en el tiempo con menos de 5 minutos de pérdida. Si el corte sale mal, hay \textbf{rollback}: durante dos semanas el servidor actual recibe los cambios y volver atrás toma \textbf{2 horas}.
+\pregunta{¿Qué ley aplica a los datos?}{La Ley Federal de Protección de Datos Personales en Posesión de los Particulares, de marzo de 2025. VAR es el responsable y AWS el encargado. Por eso los datos primarios quedan en México, todo va cifrado y la copia en EE.\,UU. se declara en el aviso de privacidad. Los comprobantes fiscales se guardan 5 años por el Código Fiscal.}
+\end{lamina}
+
+\begin{lamina}{11 · Pregunta de cierre}{Benjamín · 9:30--10:00}
+Respondemos la pregunta de cierre: recomendamos \textbf{AWS en México Central}, por \textbf{495 dólares al mes hoy y 1.046 en la expansión}, con 99,9 \%, RPO de 15 minutos y RTO de 4 horas. Cambiaríamos a Azure si VAR usara Microsoft 365 o SQL Server, o si ninguna copia pudiera salir de México. Gracias; quedamos atentos a sus preguntas.
+\end{lamina}
+
+\section*{\sffamily\color{navy}\large Banco de preguntas adicionales}
+\begin{itemize}[leftmargin=1.5em,itemsep=2pt]
+  \item \textbf{¿Usaron IA?} Sí, y está declarado en el informe: Claude apoyó la redacción, los cálculos y el armado de las calculadoras, los diagramas y la presentación. Las tarifas se contrastaron con las calculadoras oficiales y los enlaces se abrieron uno por uno. Cada uno de nosotros debe poder explicar lo que dice el informe. (Cualquiera debe poder responder esta.)
+  \item \textbf{¿Por qué no una arquitectura híbrida o multinube?} Duplica identidades, monitoreo y competencias para un equipo de dos personas, y el tráfico entre nubes cuesta y agrega latencia.
+  \item \textbf{¿Qué es RPO y RTO?} El RPO es cuántos datos se pueden perder (15 min); el RTO es cuánto puede tardar en volver el servicio (4 h).
+  \item \textbf{¿Una estimación es una cotización?} No. Son precios de lista sin impuestos ni descuentos negociados; sirven para comparar, no para comprar.
+  \item \textbf{¿Por qué Azure no tiene enlace como AWS?} Porque Azure Pricing Calculator exige iniciar sesión para guardar o compartir, y el enunciado no pide crear cuentas. Por eso adjuntamos capturas con la configuración y los totales.
+  \item \textbf{¿Qué pasa si se cae toda la región de Querétaro?} Se reconstruye en la región secundaria desde la copia diaria: RPO y RTO de 24 h, que la gerencia aceptó como supuesto.
+\end{itemize}
+\end{document}
