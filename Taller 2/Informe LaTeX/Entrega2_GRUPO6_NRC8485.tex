@@ -47,6 +47,12 @@
 \usepackage{caption}
 \captionsetup{font={small,sf}, labelfont={bf,color=navy}, skip=6pt}
 \usepackage{float}
+% Salto de página si quedan menos de #1 de espacio (como \Needspace del paquete needspace)
+\makeatletter
+\newcommand{\needspace}[1]{\par\penalty-100\begingroup\setlength{\dimen@}{#1}%
+  \dimen@ii\pagegoal\advance\dimen@ii-\pagetotal
+  \ifdim\dimen@>\dimen@ii\ifdim\dimen@ii>\z@\vfil\fi\break\fi\endgroup}
+\makeatother
 \usepackage{enumitem}
 \setlist{itemsep=1pt, topsep=3pt, leftmargin=1.4em}
 \usepackage{tikz}
@@ -137,6 +143,7 @@ Matías Muñoz Parraguirre & Migración, riesgos y cumplimiento\\
 % =====================================================================
 \pagenumbering{roman}
 \setcounter{page}{1}
+\fancyfoot[C]{\sffamily\small\thepage}
 {\hypersetup{linkcolor=ink}\tableofcontents}
 \vspace{0.6em}
 {\small\listoffigures}
@@ -144,6 +151,7 @@ Matías Muñoz Parraguirre & Migración, riesgos y cumplimiento\\
 \clearpage
 \pagenumbering{arabic}
 \setcounter{page}{1}
+\fancyfoot[C]{\sffamily\small Página \thepage\ de \pageref*{LastPage}}
 
 % =====================================================================
 \section{Introducción y objetivos}
@@ -227,7 +235,7 @@ Los seis servicios son ofertas de \emph{infraestructura como servicio} (IaaS: EC
 \textbf{Ajuste a VAR.} Aquí viven los PDF y XML de facturas y contratos (de 400 GB hoy a 1,8 TB después). El versionado y el bloqueo de objetos protegen contra borrados y ransomware, y el ciclo de vida mueve a almacenamiento de archivo lo que tiene más de un año, conservándolo los cinco años que exige la ley fiscal (sección~\ref{sec:cumplimiento}).
 
 \subsection{Base de datos administrada: Amazon RDS y Azure SQL Database}
-\textbf{Capacidades.} Amazon RDS administra seis motores (PostgreSQL, MySQL, MariaDB, Oracle, SQL Server y Db2): aprovisiona, parcha, respalda y conmuta por error, y ofrece Multi-AZ con una réplica síncrona en otra zona \parencite{aws-rds,aws-rds-maz}. Azure SQL Database es un servicio administrado del motor SQL Server; ofrece los niveles General Purpose, Business Critical y Hyperscale, y llega hasta 128 vCore y 4 TB, o hasta 128 TB en Hyperscale \parencite{az-sqldb}.
+\textbf{Capacidades.} Amazon RDS administra seis motores (PostgreSQL, MySQL, MariaDB, Oracle, SQL Server y Db2), sin contar Amazon Aurora, que AWS documenta como un servicio aparte: aprovisiona, parcha, respalda y conmuta por error, y ofrece Multi-AZ con una réplica síncrona en otra zona \parencite{aws-rds,aws-rds-maz}. Azure SQL Database es un servicio administrado del motor SQL Server; ofrece los niveles General Purpose, Business Critical y Hyperscale, y llega hasta 128 vCore y 4 TB, o hasta 128 TB en Hyperscale \parencite{az-sqldb}.
 
 \textbf{Equivalencia.} RDS no tiene un único par en Azure: el equivalente depende del motor. Como VAR usa PostgreSQL (tabla~\ref{tab:supuestos2}), el par justo es \emph{RDS for PostgreSQL} frente a \emph{Azure Database for PostgreSQL – Flexible Server}, como permite el enunciado \parencite{az-pg}. Azure SQL Database solo sería la opción natural si VAR usara SQL Server, porque obligaría a migrar el motor y a reescribir consultas y procedimientos.
 
@@ -236,7 +244,7 @@ Los seis servicios son ofertas de \emph{infraestructura como servicio} (IaaS: EC
 \textbf{Ajuste a VAR.} Las 60.000 transacciones al mes de hoy, que serán 200.000, son una carga baja para una instancia de 2 vCPU (menos de una transacción por segundo incluso en los días de cierre). Lo que manda el tamaño es la disponibilidad, no el rendimiento, y por eso ambos lados usan una réplica síncrona en otra zona.
 
 \subsection{Matriz comparativa 1: servicios y ajuste funcional}
-La tabla~\ref{tab:matriz1} resume la investigación. El costo mensual corresponde al escenario actual de la sección~\ref{sec:costos}.
+La tabla~\ref{tab:matriz1} resume la investigación. Los costos mensuales corresponden a los escenarios actual y de expansión de la sección~\ref{sec:costos}.
 
 \begin{table}[tbp]
 \centering\footnotesize
@@ -251,6 +259,7 @@ Aplicación concreta en VAR & 2 × \texttt{m7i.large} (4 en la expansión), S3 p
 \rowcolor{rowgray} Escalabilidad y rendimiento & Auto Scaling horizontal en 3 zonas; RDS escala de forma vertical y con réplicas de lectura. & Scale Sets en 3 zonas; Flexible Server escala de forma vertical y con réplicas; SQL DB, además, con Hyperscale y serverless.\\
 Seguridad, respaldo y SLA publicado & KMS, IAM, cifrado por defecto en S3. SLA: EC2 en 2+ zonas 99,99\,\%; S3 99,9\,\%; RDS Multi-AZ 99,95\,\%. Copia de respaldos entre regiones con AWS Backup. & Key Vault, Entra ID y cifrado por defecto. SLA: VM en zonas 99,99\,\%; Blob caliente 99,9\,\%; PostgreSQL con HA de zona 99,99\,\%. Sin par regional para el geo-respaldo.\\
 \rowcolor{rowgray} Costo mensual estimado (actual) & \textbf{\usd{495,45}} & \textbf{\usd{564,73}}\\
+Costo mensual estimado (expansión) & \textbf{\usd{1.045,84}} & \textbf{\usd{1.188,68}}\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -294,6 +303,8 @@ Transferencia & 150 GB de salida a Internet al mes & 600 GB de salida a Internet
 \toprule
 \textbf{Concepto} & \textbf{AWS} & \textbf{Azure} & \textbf{Supuesto / fuente (región, cantidad y tarifa)}\\
 \midrule
+\multicolumn{4}{l}{\textit{Región y modalidad:} AWS \texttt{mx-central-1} / Azure \emph{Mexico Central}; USD; pago por uso (On-Demand).}\\
+\midrule
 Cómputo (VM) & 165,28 & 177,22 & 2 × 730 h. AWS: \texttt{m7i.large} a 0,10584/h más EBS gp3 a 0,084/GB-mes. Azure: \texttt{D2s v5} a 0,106/h más P6 a 11,23/disco-mes.\\
 \rowcolor{rowgray} Almacenamiento de objetos & 13,97 & 16,56 & 500 GB. S3 Standard a 0,02415/GB; Blob caliente ZRS a 0,0286/GB; más solicitudes.\\
 Base de datos administrada & 287,94 & 318,25 & RDS \texttt{db.m7g.large} Multi-AZ a 0,352/h más 128 GB a 0,242. Flexible GP 2 vCore × 2 (HA) a 0,0979/vCore-h más 128 GB × 2 a 0,1265.\\
@@ -303,7 +314,8 @@ Transferencia de datos & 13,50 & 13,05 & 150 GB de salida. AWS 0,09/GB; Azure 0,
 \textbf{TOTAL mensual} & \textbf{495,45} & \textbf{564,73} & Azure, +14,0\,\%. Calculadoras: 495,45 y 556,03 + 8,70.\\
 \textbf{TOTAL anual} & \textbf{5.945,40} & \textbf{6.776,76} & \(12 \times\) total mensual. Costo por cuenta: \usd{2,48} (AWS) y \usd{2,82} (Azure) al mes.\\
 \bottomrule
-\end{tabularx}
+\end{tabularx}\par\smallskip
+{\scriptsize\color{ink!75}Nota: totales calculados sin redondear cada línea; la suma de las líneas mostradas puede diferir en ±0,01.\par}
 \end{table}
 
 \subsection{Matriz comparativa 2: escenario de expansión a cuatro estados}
@@ -314,6 +326,8 @@ Transferencia de datos & 13,50 & 13,05 & 150 GB de salida. AWS 0,09/GB; Azure 0,
 \toprule
 \textbf{Concepto} & \textbf{AWS} & \textbf{Azure} & \textbf{Supuesto / fuente (región, cantidad y tarifa)}\\
 \midrule
+\multicolumn{4}{l}{\textit{Región y modalidad:} AWS \texttt{mx-central-1} / Azure \emph{Mexico Central}; USD; pago por uso (On-Demand).}\\
+\midrule
 Cómputo (VM) & 330,56 & 354,43 & 4 × 730 h, con las mismas tarifas del escenario actual.\\
 \rowcolor{rowgray} Almacenamiento de objetos & 55,86 & 66,22 & 2.000 GB, 0,8 M escrituras y 8 M lecturas.\\
 Base de datos administrada & 575,87 & 636,50 & RDS \texttt{db.m7g.xlarge} Multi-AZ a 0,704/h más 256 GB. Flexible GP 4 vCore × 2 (HA) más 256 GB × 2.\\
@@ -321,15 +335,16 @@ Base de datos administrada & 575,87 & 636,50 & RDS \texttt{db.m7g.xlarge} Multi-
 Transferencia de datos & 54,00 & 52,20 & 600 GB de salida.\\
 \midrule
 \textbf{TOTAL mensual} & \textbf{1.045,84} & \textbf{1.188,68} & Azure, +13,7\,\%. Calculadoras: 1.045,83 y 1.179,98 + 8,70.\\
-\textbf{TOTAL anual} & \textbf{12.550,08} & \textbf{14.264,16} & Ambos bajo el techo de \usd{15.000} al año. Costo por cuenta: \usd{1,74} y \usd{1,98} al mes.\\
+\textbf{TOTAL anual} & \textbf{12.550,08} & \textbf{14.264,16} & Bajo el techo de \usd{15.000} al año sin considerar los costos omitidos (sección~\ref{sec:omitidos}). Costo por cuenta: \usd{1,74} y \usd{1,98} al mes.\\
 \bottomrule
-\end{tabularx}
+\end{tabularx}\par\smallskip
+{\scriptsize\color{ink!75}Nota: totales calculados sin redondear cada línea; la suma de las líneas mostradas puede diferir en ±0,01.\par}
 \end{table}
 
-\subsection{Costos omitidos y sensibilidad}
-Las matrices cubren las cinco categorías que pide el enunciado. Quedan fuera, en ambos proveedores, el balanceador de carga y el firewall de aplicaciones (en AWS el ALB parte en 0,0236 USD/h, unos \usd{17} al mes más capacidad), la VPN de la migración, las IP públicas, el monitoreo y los registros, el servicio de claves, el plan de soporte, la copia de respaldos en una segunda región y el IVA. Como supuesto, el grupo estima que estos elementos suman entre 20\,\% y 30\,\% sobre el total; aun así, el escenario de expansión en AWS (\(12.550 \times 1{,}3 \approx\) \usd{16.300}) quedaría cerca del techo de presupuesto, que habría que revisar.
+\subsection{Costos omitidos y sensibilidad}\label{sec:omitidos}
+Las matrices cubren las cinco categorías que pide el enunciado. Quedan fuera, en ambos proveedores, el balanceador de carga y el firewall de aplicaciones (en AWS el ALB parte en 0,0236 USD/h, unos \usd{17} al mes más capacidad), la VPN de la migración, las IP públicas, el monitoreo y los registros, el servicio de claves, el plan de soporte, la copia de respaldos en una segunda región y el IVA. Como supuesto, el grupo estima que estos elementos suman entre 20\,\% y 30\,\% sobre el total. En el extremo superior, el escenario de expansión en AWS (\(12.550 \times 1{,}3 \approx\) \usd{16.300} al año) supera el techo de \usd{15.000} en unos \usd{1.300} si no se optimiza (en Azure, \(14.264 \times 1{,}3 \approx\) \usd{18.540}). Con la reserva a un año del cómputo y la base de datos (\(822{,}96 \times 12 \times 1{,}3 \approx\) \usd{12.840}), AWS queda bajo el techo.
 
-\begin{figure}[H]
+\begin{figure}[htbp]
 \centering
 \input{figuras/costos.tex}
 \caption{Costo mensual por escenario y modalidad de cobro (USD, 10-11-2026).}\label{fig:costos}
@@ -338,6 +353,7 @@ Las matrices cubren las cinco categorías que pide el enunciado. Quedan fuera, e
 \textbf{Sensibilidad.} Si VAR se compromete por un año con el cómputo y la base de datos (AWS Reserved Instances sin pago inicial y Azure Reservations), la diferencia casi desaparece: \usd{384,01} frente a \usd{390,94} en el escenario actual y \usd{822,96} frente a \usd{841,09} en la expansión (figura~\ref{fig:costos}). Azure descuenta más al reservar (entre 38\,\% y 40\,\%, contra 23\,\% a 34\,\% en AWS). Por eso el costo por sí solo no decide la recomendación: a mediano plazo pesan más la continuidad y el ajuste operativo (sección~\ref{sec:recomendacion}).
 
 % =====================================================================
+\needspace{8\baselineskip}
 \section{Arquitectura y recomendación}\label{sec:recomendacion}
 % =====================================================================
 \subsection{Matriz de decisión}
@@ -351,7 +367,7 @@ Se ponderaron cinco criterios que se desprenden del caso. El puntaje va de 1 a 5
 \textbf{Criterio} & \textbf{Peso} & \textbf{AWS} & \textbf{Azure} & \textbf{Evidencia}\\
 \midrule
 Seguridad & 25\,\% & 5 & 5 & Cifrado por defecto, claves propias, MFA y servicios de detección equivalentes en ambos.\\
-\rowcolor{rowgray} Costo & 25\,\% & 5 & 4 & AWS cuesta 12--14\,\% menos pagando por uso; con reservas la diferencia baja a 2\,\%.\\
+\rowcolor{rowgray} Costo & 25\,\% & 5 & 4 & AWS cuesta 12\,\% menos pagando por uso (Azure, 14\,\% más); con reservas la diferencia baja a 2\,\%.\\
 Rendimiento y disponibilidad & 20\,\% & 4 & 5 & SLA de la base: 99,95\,\% en RDS Multi-AZ y 99,99\,\% en Flexible Server con HA de zona.\\
 \rowcolor{rowgray} Crecimiento & 15\,\% & 5 & 4 & 3 zonas en ambas regiones; 15 réplicas de lectura en RDS y 5 en Flexible Server.\\
 Continuidad ante desastre regional & 15\,\% & 5 & 3 & AWS Backup copia a otra región; Mexico Central no tiene par para el geo-respaldo de PostgreSQL.\\
@@ -385,6 +401,7 @@ Se recomienda \textbf{AWS en la región México Central (\texttt{mx-central-1}) 
 \textbf{Ventajas y desventajas.} A favor de AWS: menor costo por uso, copia de respaldos entre regiones disponible para una región sin par, más réplicas de lectura y un ecosistema de migración maduro (DMS y DataSync). En contra: el SLA de la base es menor (99,95\,\% frente a 99,99\,\%), los respaldos de la base cuestan aparte y Azure se integraría mejor si VAR adoptara Microsoft 365. En costo-beneficio, AWS entrega la misma arquitectura por \usd{831} menos al año hoy y \usd{1.714} menos en la expansión, y cubre el riesgo de desastre regional que Azure no resuelve de forma nativa en México.
 
 % =====================================================================
+\needspace{8\baselineskip}
 \section{Plan de implementación}\label{sec:implementacion}
 % =====================================================================
 \subsection{Migración}
@@ -410,7 +427,7 @@ Aplicación web & 1 servidor & Base, NAS, correo y proveedor de timbrado & Se vu
 \textbf{Método elegido: por etapas, con replicación.} No se hace un corte único («big bang»). (1) Los documentos se copian en segundo plano mientras se opera. (2) La base se replica con CDC, de modo que la nube va solo segundos detrás del servidor actual. (3) Un piloto con 20 cuentas de clientes y la oficina de la CDMX valida la operación real. (4) El corte se hace un fin de semana fuera del cierre de mes: se congelan las escrituras unos 30 minutos, se aplica la última sincronización, se valida y se cambia el DNS (TTL de 60 s). (5) Tras el corte, cada estado nuevo se incorpora sobre la plataforma ya estable, uno por mes.
 
 \subsection{Continuidad operacional}
-\textbf{Estrategia de respaldos (regla 3-2-1).} RDS hace respaldos automáticos diarios con retención de 35 días y PITR, porque sube los registros de transacciones de forma continua \parencite{aws-rds-backup}. AWS Backup agrega copias mensuales (12 meses) y anuales (5 años, en almacenamiento de archivo), y copia cada día los respaldos a una bóveda en otra región con Vault Lock. S3 usa versionado y Object Lock para los comprobantes fiscales.
+\textbf{Estrategia de respaldos (regla 3-2-1).} RDS hace respaldos automáticos diarios con retención de 35 días y PITR, porque sube los registros de transacciones de forma continua \parencite{aws-rds-backup}. AWS Backup agrega copias mensuales (12 meses) y anuales (5 años, en almacenamiento de archivo), y copia cada día los respaldos a una bóveda en otra región con Vault Lock; el costo de esa copia entre regiones está entre los costos omitidos de la sección~\ref{sec:omitidos}. S3 usa versionado y Object Lock para los comprobantes fiscales.
 
 \begin{table}[H]
 \centering\footnotesize
@@ -422,13 +439,13 @@ Aplicación web & 1 servidor & Base, NAS, correo y proveedor de timbrado & Se vu
 Instancia EC2 & Auto Scaling la reemplaza; el balanceador la retira del servicio & 0 & < 10 min\\
 \rowcolor{rowgray} Zona de disponibilidad & Conmutación por error de RDS Multi-AZ y Auto Scaling en las otras zonas & 0 & 1–2 min (base)\\
 Corrupción o borrado lógico & Restauración de RDS a un punto en el tiempo y versión previa del objeto en S3 & ≤ 5 min & ≤ 2 h\\
-\rowcolor{rowgray} Ransomware o credencial robada & Restauración desde la bóveda inmutable, en una cuenta de respaldos separada & ≤ 15 min (base) & ≤ 4 h\\
+\rowcolor{rowgray} Ransomware o credencial robada & Restauración desde la bóveda inmutable, en una cuenta de respaldos separada (copia diaria) & ≤ 24 h & ≤ 4 h\\
 Desastre regional & Reconstrucción en la región secundaria desde la copia diaria & ≤ 24 h & ≤ 24 h\\
 \bottomrule
 \end{tabularx}
 \end{table}
 
-Los objetivos del caso (RPO de 15 min y RTO de 4 h) se cumplen en todas las fallas, salvo en el desastre regional, cuyo valor la gerencia aceptó de forma explícita (tabla~\ref{tab:supuestos}), siguiendo el análisis de impacto de \textcite{nist80034}.
+Los objetivos del caso (RPO de 15 min y RTO de 4 h) se cumplen en todas las fallas, salvo dos. En el desastre regional, la gerencia aceptó de forma explícita un RPO y un RTO de 24 h (tabla~\ref{tab:supuestos}), siguiendo el análisis de impacto de \textcite{nist80034}. En el ransomware que compromete la cuenta principal, el RTO de 4 h se mantiene, pero el RPO queda en 24 h, porque la última copia limpia en la cuenta separada es la del día anterior; si la gerencia necesita menos, se aumenta la frecuencia de esa copia, con el costo adicional correspondiente.
 
 \textbf{Plan de reversión (rollback).} Durante las dos semanas posteriores al corte, el servidor actual queda en espera y recibe los cambios de la nube con replicación inversa de DMS. Se revierte si ocurre alguna de estas condiciones: más de 2\,\% de errores en transacciones durante 30 minutos, una diferencia de montos en la conciliación diaria o una latencia p95 sobre 1 segundo por más de 30 minutos. El procedimiento es congelar escrituras, aplicar la última sincronización y devolver el DNS al sitio actual, con un tiempo objetivo de 2 horas. Recién al cumplirse 30 días sin incidentes se da de baja el equipo actual.
 
@@ -445,6 +462,7 @@ No se pretende un análisis jurídico exhaustivo, sino identificar la normativa 
 \begin{table}[H]
 \centering\footnotesize
 \caption{Matriz comparativa 3: implementación en AWS y en Azure.}\label{tab:matriz3}
+\renewcommand{\arraystretch}{1.05}
 \begin{tabularx}{\linewidth}{L{2.2cm}YYY}
 \toprule
 \textbf{Dimensión} & \textbf{Propuesta AWS} & \textbf{Propuesta Azure} & \textbf{Decisión / justificación}\\
@@ -527,7 +545,7 @@ Tras la semana 16, cada estado nuevo se incorpora en unas cuatro semanas (cuenta
 Disponibilidad & (minutos del mes − minutos de caída) ÷ minutos del mes × 100 & ≥ 99,9\,\% & Mensual & CloudWatch Synthetics\\
 \rowcolor{rowgray} Latencia p95 & Percentil 95 del tiempo de respuesta de la API transaccional & ≤ 300 ms & Diaria & Registros del ALB\\
 Desviación del presupuesto & Gasto real ÷ presupuesto del mes × 100 & ≤ 100\,\% (alerta al 80\,\%) & Mensual & Cost Explorer y Budgets\\
-\rowcolor{rowgray} Costo por cuenta & Gasto cloud del mes ÷ cuentas activas & ≤ \usd{2,50} hoy; ≤ \usd{1,90} en la expansión & Mensual & Cost Explorer\\
+\rowcolor{rowgray} Costo por cuenta & Gasto del mes en los servicios de la Matriz 2 (sin costos omitidos ni IVA) ÷ cuentas activas & ≤ \usd{3,20} hoy; ≤ \usd{2,30} en la expansión & Mensual & Cost Explorer\\
 RTO medido & Tiempo desde la declaración del incidente hasta el servicio restaurado en un simulacro & ≤ 4 h & Trimestral & Acta del simulacro\\
 \rowcolor{rowgray} Respaldos verificados & Restauraciones exitosas ÷ restauraciones probadas × 100 & 100\,\% & Mensual & Informes de AWS Backup\\
 Hallazgos críticos abiertos & N.º de hallazgos críticos de seguridad con más de 7 días & 0 & Semanal & Security Hub\\
@@ -538,7 +556,7 @@ Hallazgos críticos abiertos & N.º de hallazgos críticos de seguridad con más
 % =====================================================================
 \section{Conclusión}\label{sec:conclusion}
 % =====================================================================
-\textbf{¿Qué solución recomendamos a VAR para operar hoy y crecer a cuatro estados?} Una sola nube, \textbf{AWS en la región México Central}, con aplicación en EC2 en varias zonas y Auto Scaling, documentos en S3 con versionado y bloqueo, y PostgreSQL en RDS Multi-AZ, todo cifrado con claves propias y con copias de respaldo en una segunda región. Con esta arquitectura, VAR pasa de un servidor sin respaldo externo a una plataforma con 99,93\,\% de disponibilidad compuesta, RPO de 15 minutos y RTO de 4 horas, por \usd{495} al mes hoy y \usd{1.046} en la expansión. Con la expansión, además, el costo por cuenta baja un 30\,\%.
+\textbf{¿Qué solución recomendamos a VAR para operar hoy y crecer a cuatro estados?} Una sola nube, \textbf{AWS en la región México Central}, con aplicación en EC2 en varias zonas y Auto Scaling, documentos en S3 con versionado y bloqueo, y PostgreSQL en RDS Multi-AZ, todo cifrado con claves propias y con copias de respaldo en una segunda región. Con esta arquitectura, VAR pasa de un servidor sin respaldo externo a una plataforma con 99,93\,\% de disponibilidad compuesta, RPO de 15 minutos y RTO de 4 horas ante fallas de instancia, de zona o de datos, por \usd{495} al mes hoy y \usd{1.046} en la expansión. Con la expansión, además, el costo por cuenta baja un 30\,\%.
 
 \textbf{¿Bajo qué supuestos cambiaría la recomendación?}
 \begin{itemize}
@@ -691,7 +709,7 @@ Azure & Actual & 556,03 & + 8,70 & 564,73 & Figura~\ref{fig:calc-az-a}\\
 \end{tabularx}
 \end{table}
 
-\textbf{Conciliación.} (1) Azure Pricing Calculator descuenta de forma automática los primeros 100 GB de salida a Internet (cobra 4,35 y 43,50 en lugar de 13,05 y 52,20). Como el enunciado excluye las capas gratuitas, la Matriz 2 suma esos 100 GB × 0,087 = \usd{8,70}. (2) La diferencia de 0,01 en la expansión de AWS se debe a que la calculadora redondea por servicio y la planilla redondea solo el total. (3) Cada tarifa unitaria de la planilla coincide con la que muestra la calculadora; las fórmulas de snapshots de EBS y de Azure Backup siguen el modelo de cada calculadora.
+\textbf{Conciliación.} (1) Azure Pricing Calculator descuenta de forma automática los primeros 100 GB de salida a Internet (cobra 4,35 y 43,50 en lugar de 13,05 y 52,20). Como el enunciado excluye las capas gratuitas, la Matriz 2 suma esos 100 GB × 0,087 = \usd{8,70}. (2) La diferencia de 0,01 en la expansión de AWS se debe a que la calculadora redondea por servicio y la planilla redondea solo el total. Por la misma razón, en las tablas~\ref{tab:m2a} y~\ref{tab:m2b} la suma de las líneas redondeadas puede diferir del total en ±0,01: 495,46 frente a 495,45 (AWS, actual), 564,74 frente a 564,73 (Azure, actual) y 1.188,67 frente a 1.188,68 (Azure, expansión). (3) Cada tarifa unitaria de la planilla coincide con la que muestra la calculadora; las fórmulas de snapshots de EBS y de Azure Backup siguen el modelo de cada calculadora.
 
 \textbf{Configuración en AWS} (región \emph{Mexico (Central)}; entre paréntesis, la expansión). (1) \emph{Amazon EC2}: Linux, \texttt{m7i.large}, 2 (4) instancias, uso constante, On-Demand, EBS gp3 de 64 GB y snapshot diario con 1 GB de cambio. (2) \emph{Amazon S3}: S3 Standard, 500 GB (2.000 GB), 200.000 PUT (800.000), 2.000.000 GET (8.000.000) y 150 GB (600 GB) de salida a Internet. (3) \emph{Amazon RDS for PostgreSQL}: \texttt{db.m7g.large} (\texttt{db.m7g.xlarge}), Multi-AZ, On-Demand, gp3 de 128 GB (256 GB) y 64 GB (128 GB) de respaldo adicional, sin RDS Proxy ni Database Insights.
 
