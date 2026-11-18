@@ -34,7 +34,7 @@
 {\sffamily Grupo 6 · NRC 8485 · Docente: Eduardo Correa Marchant\par}
 \end{center}
 
-\textbf{Cómo usarlo.} La presentación (\texttt{Entrega2\_GRUPO6\_NRC8485.html}) se abre en el navegador: flechas para avanzar, \textbf{F} para pantalla completa y \textbf{N} para ver estas notas en pantalla. También va exportada a PDF (\texttt{Entrega2\_GRUPO6\_NRC8485 - Presentacion.pdf}) por si el computador de la sala no la abre. Son 11 láminas y 10 minutos. Cada integrante habla unos 2 minutos. El texto está pensado para decirlo con sus palabras, no para leerlo: lo importante son las cifras en negrita.
+\textbf{Cómo usarlo.} La presentación (\texttt{Entrega2\_GRUPO6\_NRC8485.html}) se abre en el navegador: flechas para avanzar, \textbf{F} para pantalla completa y \textbf{N} para ver estas notas en pantalla. También va exportada a PDF (\texttt{Entrega2\_GRUPO6\_NRC8485 - Presentacion.pdf}) por si el computador de la sala no la abre. Son 11 láminas y 10 minutos. Martín no presenta, así que su parte se repartió: los costos (lámina 5) los toma Francisco y la sensibilidad (lámina 6), Julián. El texto está pensado para decirlo con sus palabras, no para leerlo: lo importante son las cifras en negrita.
 
 {\small
 \begin{tabularx}{\linewidth}{@{}lXcc@{}}
@@ -42,9 +42,8 @@
 \textbf{Integrante} & \textbf{Bloque} & \textbf{Láminas} & \textbf{Tiempo}\\
 \midrule
 Benjamín Peña & Apertura, caso y supuestos; cierre & 1--2 y 11 & 0:00--1:30 y 9:30--10:00\\
-Francisco Morales & Comparación de servicios (Matriz 1) & 3--4 & 1:30--3:30\\
-Martín Burgos & Costos en dos escenarios (Matriz 2) & 5--6 & 3:30--5:30\\
-Julián Pacheco & Arquitectura y recomendación & 7--8 & 5:30--7:30\\
+Francisco Morales & Comparación de servicios y costos (Matrices 1 y 2) & 3--5 & 1:30--4:45\\
+Julián Pacheco & Sensibilidad, arquitectura y recomendación & 6--8 & 4:45--7:30\\
 Matías Muñoz & Migración, riesgos y continuidad & 9--10 & 7:30--9:30\\
 \bottomrule
 \end{tabularx}}
@@ -70,12 +69,12 @@ Tres diferencias pesan para VAR. En disponibilidad de la base gana Azure: \textb
 \pregunta{¿De dónde sale lo de la región sin par?}{De la página oficial de Microsoft sobre pares de regiones, que lista Mexico Central sin par, y de la de respaldos de PostgreSQL Flexible, que limita el geo-respaldo a regiones pareadas. Ambas están citadas en el informe.}
 \end{lamina}
 
-\begin{lamina}{5 · Costos en dos escenarios}{Martín · 3:30--4:45}
+\begin{lamina}{5 · Costos en dos escenarios}{Francisco · 3:30--4:45}
 Los costos salen de las \textbf{calculadoras oficiales} de AWS y Azure, configuradas sin iniciar sesión, en las regiones de México, en dólares, el 10 de noviembre de 2026, pagando por uso y sin capas gratuitas. Configuramos la misma arquitectura en los dos proveedores. AWS cuesta \textbf{495 dólares al mes hoy y 1.046 en la expansión}; Azure, \textbf{565 y 1.189}. Azure sale un \textbf{14 \% más caro}, sobre todo por la base de datos con alta disponibilidad y porque cobra por cada máquina respaldada. Al año son \textbf{5.945 contra 6.777} hoy, y \textbf{12.550 contra 14.264} en la expansión.
 \pregunta{¿Cómo calcularon el total y dónde se puede verificar?}{Cada línea es cantidad por tarifa, con 730 horas al mes; el total mensual es la suma y el anual, doce veces el mensual. Las estimaciones de AWS tienen enlace público y las de Azure van en capturas, porque Azure pide iniciar sesión para compartir. Todo está en el anexo C del informe y en la planilla Excel, con la fuente de cada tarifa.}
 \end{lamina}
 
-\begin{lamina}{6 · Sensibilidad}{Martín · 4:45--5:30}
+\begin{lamina}{6 · Sensibilidad}{Julián · 4:45--5:30}
 Si VAR reserva por un año el cómputo y la base de datos, Azure descuenta más y la diferencia casi desaparece: \textbf{384 contra 391 dólares} hoy, menos de 2 \%. Además, hay costos fuera de la matriz en los dos proveedores: balanceador, VPN, monitoreo, soporte e IVA. Como supuesto, suman entre un \textbf{20 y un 30 \%}. Conclusión: el precio no decide, así que miramos el resto de los criterios.
 \pregunta{¿Por qué no usaron las capas gratuitas?}{Porque el enunciado lo prohíbe para producción. Por la misma razón, a la calculadora de Azure, que descuenta sola los primeros 100 GB de salida, le sumamos de vuelta esos 8,70 dólares al mes.}
 \end{lamina}

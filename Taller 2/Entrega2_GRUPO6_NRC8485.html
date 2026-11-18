@@ -170,7 +170,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 5 · COSTOS -->
-<section class="slide" data-notes="<b>Martín · 3:30–4:45</b> Los costos salen de las calculadoras oficiales de AWS y Azure, configuradas sin iniciar sesión, en las regiones de México, en dólares, el 10 de noviembre, pagando por uso y sin capas gratuitas. Con la misma arquitectura en ambos, AWS cuesta 495 dólares al mes hoy y 1.046 en la expansión; Azure, 565 y 1.189. Azure sale un 14 % más caro, sobre todo por la base de datos con alta disponibilidad y porque cobra por cada VM respaldada. Al año: 5.945 contra 6.777 hoy, y 12.550 contra 14.264 en la expansión. Las estimaciones de AWS tienen enlace público y las de Azure van en capturas, en el anexo C.">
+<section class="slide" data-notes="<b>Francisco · 3:30–4:45</b> Los costos salen de las calculadoras oficiales de AWS y Azure, configuradas sin iniciar sesión, en las regiones de México, en dólares, el 10 de noviembre, pagando por uso y sin capas gratuitas. Con la misma arquitectura en ambos, AWS cuesta 495 dólares al mes hoy y 1.046 en la expansión; Azure, 565 y 1.189. Azure sale un 14 % más caro, sobre todo por la base de datos con alta disponibilidad y porque cobra por cada VM respaldada. Al año: 5.945 contra 6.777 hoy, y 12.550 contra 14.264 en la expansión. Las estimaciones de AWS tienen enlace público y las de Azure van en capturas, en el anexo C.">
   <div class="kicker rv"><b>04</b> Matriz 2 · USD por mes · calculadoras oficiales · 10-11-2026</div>
   <h2 class="rv">Pagando por uso, Azure cuesta <em>14 % más</em></h2>
   <div style="display:grid;grid-template-columns:1fr 430px;gap:50px;margin-top:30px;flex:1;align-items:end">
@@ -195,7 +195,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 6 · SENSIBILIDAD -->
-<section class="slide" data-notes="<b>Martín · 4:45–5:30</b> Pero ojo: si VAR reserva por un año el cómputo y la base de datos, Azure descuenta más y la diferencia casi desaparece: 384 contra 391 dólares hoy, menos de 2 %. Además, quedan costos fuera que suman entre 20 y 30 % en ambos: balanceador, VPN, monitoreo, soporte e IVA. Conclusión de costos: el precio no decide. Por eso miramos el resto de los criterios.">
+<section class="slide" data-notes="<b>Julián · 4:45–5:30</b> Pero ojo: si VAR reserva por un año el cómputo y la base de datos, Azure descuenta más y la diferencia casi desaparece: 384 contra 391 dólares hoy, menos de 2 %. Además, quedan costos fuera que suman entre 20 y 30 % en ambos: balanceador, VPN, monitoreo, soporte e IVA. Conclusión de costos: el precio no decide. Por eso miramos el resto de los criterios.">
   <div class="kicker rv"><b>05</b> Sensibilidad · reserva de 1 año</div>
   <h2 class="rv">Con reserva a un año, <em>el precio deja de decidir</em></h2>
   <div class="grid s6" style="grid-template-columns:1fr 1fr;margin-top:56px">
@@ -374,16 +374,25 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
     document.getElementById('count').textContent=(i+1)+' / '+slides.length;
     document.getElementById('progress').style.width=((i+1)/slides.length*100)+'%';
     notes.innerHTML=slides[i].getAttribute('data-notes')||'';
-    try{history.replaceState(null,'','#'+(i+1));}catch(e){}}
-  document.addEventListener('keydown',function(e){
+    try{history.replaceState(null,'','#'+(i+1));}catch(e){}
+    if(chan&&!preview)chan.postMessage({type:'slide',n:i+1,total:slides.length});}
+  // sincronía con el presentador (presentador.html), solo si se sirve por http://localhost
+  var qs=new URLSearchParams(location.search), preview=qs.has('preview'), offset=parseInt(qs.get('offset')||'0',10)||0;
+  var chan=('BroadcastChannel' in window)?new BroadcastChannel('taller2-grupo6'):null;
+  if(chan)chan.onmessage=function(e){var m=e.data||{};
+    if(preview){if(m.type==='slide')show(m.n-1+offset);return;}
+    if(m.type==='next')show(i+1); else if(m.type==='prev')show(i-1);
+    else if(m.type==='goto')show(m.n-1); else if(m.type==='hello')chan.postMessage({type:'slide',n:i+1,total:slides.length});};
+  if(preview){document.getElementById('hint')&&(document.getElementById('hint').style.display='none');}
+  document.addEventListener('keydown',function(e){ if(preview)return;
     if(['ArrowRight','PageDown',' ','Enter'].indexOf(e.key)>=0){e.preventDefault();show(i+1);}
     else if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>=0){e.preventDefault();show(i-1);}
     else if(e.key==='Home')show(0); else if(e.key==='End')show(slides.length-1);
     else if(e.key==='f'||e.key==='F'){if(!document.fullscreenElement)document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();else document.exitFullscreen();}
     else if(e.key==='n'||e.key==='N')notes.classList.toggle('on');});
-  document.getElementById('viewport').addEventListener('click',function(e){show(e.clientX>window.innerWidth/2?i+1:i-1);});
+  document.getElementById('viewport').addEventListener('click',function(e){if(preview)return;show(e.clientX>window.innerWidth/2?i+1:i-1);});
   function fromHash(){var h=parseInt((location.hash||'').slice(1),10); show(isNaN(h)?0:h-1);}
-  window.addEventListener('hashchange',fromHash); fromHash();
+  window.addEventListener('hashchange',function(){if(!preview)fromHash();}); if(preview)show(offset); else fromHash();
   window.goTo=function(n){show(n-1);};
 })();
 </script>

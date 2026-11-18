@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guion · Taller 2 · Grupo 6</title>
+<style>
+:root{--bg:#0f151b;--panel:#18212a;--ink:#eef2f5;--muted:#8a97a3;--line:#2a3742;--accent:#E2A53A;--ok:#4E9A64;--warn:#E2A53A;--bad:#D25A4E}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--ink);font-family:-apple-system,"SF Pro Text","Helvetica Neue",sans-serif;overflow:hidden}
+#app{display:grid;grid-template-columns:minmax(0,1fr) 380px;grid-template-rows:auto minmax(0,1fr);height:100vh;gap:16px;padding:16px}
+header{grid-column:1/-1;display:flex;align-items:center;gap:20px}
+#who{font-size:30px;font-weight:700;color:var(--accent)}
+#slot{font-size:20px;color:var(--muted);font-variant-numeric:tabular-nums}
+#count{margin-left:auto;font-size:22px;color:var(--muted);font-variant-numeric:tabular-nums}
+#dot{width:12px;height:12px;border-radius:50%;background:var(--bad)}
+#dot.on{background:var(--ok)}
+#notesBox{background:var(--panel);border-radius:14px;padding:28px 34px;overflow:hidden;position:relative}
+#title{font-size:22px;color:var(--muted);margin-bottom:14px}
+#notes{line-height:1.45;font-size:40px}
+#notes b{color:var(--accent)}
+aside{display:flex;flex-direction:column;gap:14px;min-height:0}
+#timer{background:var(--panel);border-radius:14px;padding:16px;text-align:center}
+#clock{font-size:64px;font-weight:700;font-variant-numeric:tabular-nums}
+#clock.warn{color:var(--warn)} #clock.bad{color:var(--bad)}
+#pace{font-size:17px;color:var(--muted);margin-top:4px}
+.pv{background:var(--panel);border-radius:14px;padding:10px}
+.pv p{font-size:15px;color:var(--muted);margin:0 0 8px}
+.frame{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:8px;background:#000}
+.frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0;pointer-events:none}
+#nextWho{font-size:16px;margin-top:8px;color:var(--ink)}
+#nextWho.change{color:var(--accent);font-weight:700}
+#keys{font-size:13px;color:var(--muted);line-height:1.6}
+#warnMsg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--bg);font-size:22px;padding:40px;text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<div id="warnMsg">Este guion tiene que abrirse desde <b>http://localhost:8800/presentador.html</b>, con el servidor corriendo (ver COMO_PRESENTAR.md).</div>
+<div id="app">
+  <header><span id="dot" title="Conexión con la presentación"></span><span id="who">—</span><span id="slot"></span><span id="count">– / –</span></header>
+  <section id="notesBox"><div id="title"></div><div id="notes">Abre la presentación en la otra pantalla…</div></section>
+  <aside>
+    <div id="timer"><div id="clock">0:00</div><div id="pace">Espacio inicia o pausa · R reinicia</div></div>
+    <div class="pv"><p>En pantalla</p><div class="frame"><iframe id="cur" src="Entrega2_GRUPO6_NRC8485.html?preview&offset=0" tabindex="-1"></iframe></div></div>
+    <div class="pv"><p>Siguiente</p><div class="frame"><iframe id="nxt" src="Entrega2_GRUPO6_NRC8485.html?preview&offset=1" tabindex="-1"></iframe></div><div id="nextWho"></div></div>
+    <div id="keys">→ / ← cambian la lámina en el proyector · Espacio cronómetro · R reinicia · + / − tamaño del texto</div>
+  </aside>
+</div>
+<script>
+(function(){
+  if(location.protocol==='file:'){document.getElementById('warnMsg').style.display='flex';}
+  var chan=new BroadcastChannel('taller2-grupo6'), data=[], cur=1, total=0, scale=1;
+  var $=function(id){return document.getElementById(id);};
+  function parse(html){
+    var doc=new DOMParser().parseFromString(html,'text/html');
+    data=[].map.call(doc.querySelectorAll('section.slide'),function(s){
+      var tmp=document.createElement('div'); tmp.innerHTML=s.getAttribute('data-notes')||'';
+      var b=tmp.querySelector('b'), head=b?b.textContent:'', parts=head.split('·');
+      if(b)b.remove();
+      var h=s.querySelector('h1,h2');
+      return {who:(parts[0]||'').trim(), slot:(parts[1]||'').trim(), notes:tmp.innerHTML.trim(), title:h?h.textContent.replace(/\s+/g,' ').trim():''};
+    });
+    total=data.length; render();
+  }
+  function toSec(t){var m=/(\d+):(\d+)/.exec(t||'');return m?(+m[1])*60+(+m[2]):null;}
+  function fit(){var box=$('notesBox'), n=$('notes'), size=48*scale;
+    n.style.fontSize=size+'px';
+    while(size>18&&n.scrollHeight+$('title').offsetHeight+60>box.clientHeight){size-=1;n.style.fontSize=size+'px';}}
+  function render(){
+    var d=data[cur-1]; if(!d)return;
+    $('who').textContent=d.who; $('slot').textContent=d.slot; $('count').textContent=cur+' / '+total;
+    $('title').textContent=cur+' · '+d.title; $('notes').innerHTML=d.notes;
+    var nx=data[cur];
+    if(nx){$('nextWho').textContent=(nx.who!==d.who?'Después habla '+nx.who+' →  ':'Sigue '+nx.who+': ')+nx.title;
+      $('nextWho').className=nx.who!==d.who?'change':'';}
+    else{$('nextWho').textContent='Última lámina: preguntas';$('nextWho').className='';}
+    fit(); pace();
+  }
+  // cronómetro
+  var t0=0, acc=0, run=false;
+  function el(){return acc+(run?(Date.now()-t0)/1000:0);}
+  function fmt(s){s=Math.floor(s);return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+  function pace(){var d=data[cur-1]; if(!d)return; var s=el(), r=/(\d+:\d+)\s*[–-]\s*(\d+:\d+)/.exec(d.slot);
+    var c=$('clock'); c.textContent=fmt(s); c.className=s>=600?'bad':(s>=540?'warn':'');
+    if(!r||(!run&&acc===0)){ $('pace').textContent='Espacio inicia o pausa · R reinicia'; return; }
+    var a=toSec(r[1]), b=toSec(r[2]);
+    $('pace').textContent= s<a-10?'Vas adelantado (esta lámina parte en '+r[1]+')': s>b+10?'Vas atrasado: esta lámina termina en '+r[2]:'A tiempo · hasta '+r[2];
+  }
+  setInterval(pace,250);
+  // sincronía
+  chan.onmessage=function(e){var m=e.data||{}; if(m.type==='slide'){cur=m.n; total=m.total||total; $('dot').classList.add('on'); render();}};
+  chan.postMessage({type:'hello'});
+  setInterval(function(){chan.postMessage({type:'hello'});},3000);
+  document.addEventListener('keydown',function(e){
+    if(['ArrowRight','PageDown','Enter'].indexOf(e.key)>=0){e.preventDefault();chan.postMessage({type:'next'});}
+    else if(['ArrowLeft','PageUp','Backspace'].indexOf(e.key)>=0){e.preventDefault();chan.postMessage({type:'prev'});}
+    else if(e.key===' '){e.preventDefault(); if(run){acc=el();run=false;}else{t0=Date.now();run=true;} pace();}
+    else if(e.key==='r'||e.key==='R'){acc=0;run=false;pace();}
+    else if(e.key==='+'||e.key==='='){scale=Math.min(1.6,scale+0.1);fit();}
+    else if(e.key==='-'){scale=Math.max(0.5,scale-0.1);fit();}
+  });
+  window.addEventListener('resize',fit);
+  fetch('Entrega2_GRUPO6_NRC8485.html').then(function(r){return r.text();}).then(parse).catch(function(){document.getElementById('warnMsg').style.display='flex';});
+})();
+</script>
+</body>
+</html>
