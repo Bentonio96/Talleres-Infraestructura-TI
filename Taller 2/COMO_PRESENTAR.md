@@ -42,5 +42,5 @@ El guion muestra quién habla, el tramo de tiempo de la lámina, el texto, la l�
 
 - **El guion no mueve el proyector:** usa las flechas haciendo clic en la ventana del proyector. La presentación funciona sola.
 - **Las dos ventanas tienen que estar en el mismo Chrome** (no una en Safari y otra en Chrome).
-- **El computador de la sala no es el tuyo:** usa `Entrega2_GRUPO6_NRC8485 - Presentacion.pdf` o abre el HTML desde un pendrive, y lleva el guion en PDF.
+- **El computador de la sala no es el tuyo:** usa `Entrega2_GRUPO6_NRC8485 - Presentacion.pdf` o abre el HTML desde un pendrive, y lleva el guion en PDF (hay versión con y sin Martín).
 - Para detener el servidor: `Ctrl + C` en la Terminal.

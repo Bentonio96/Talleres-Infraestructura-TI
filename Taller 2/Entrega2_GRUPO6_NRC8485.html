@@ -86,7 +86,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 <div id="viewport"><div id="stage">
 
 <!-- 1 · PORTADA -->
-<section class="slide" data-notes="<b>Benjamín · 0:00–0:45</b> Buenos días. Somos el Grupo 6 y les presentamos la propuesta de infraestructura cloud para VAR. Hoy VAR tiene 50 empleados y 200 cuentas; quiere crecer a cuatro estados nuevos. Comparamos AWS y Azure con tarifas oficiales y llegamos a una recomendación concreta.">
+<section class="slide" data-notes="<b>Benjamín · 0:00–0:45</b> Buenos días. Somos el Grupo 6 y les presentamos la propuesta de infraestructura cloud para VAR. Hoy VAR tiene <b>50 empleados</b> y <b>200 cuentas</b>, y quiere crecer a <b>cuatro estados</b> nuevos. Comparamos AWS y Azure con la documentación y las calculadoras oficiales. Al final les damos una recomendación concreta.">
   <div class="kicker rv"><b>Taller 2</b> Infraestructura TI · NRC 8485 · Grupo 6</div>
   <div style="display:grid;grid-template-columns:1fr 560px;gap:40px;align-items:center;flex:1">
     <div>
@@ -114,7 +114,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 2 · CASO Y SUPUESTOS -->
-<section class="slide" data-notes="<b>Benjamín · 0:45–1:30</b> El caso no da país ni volúmenes, así que los declaramos como supuestos. México, porque tiene estados y porque AWS y Azure tienen región en Querétaro. Hoy: CDMX. Expansión: Nuevo León, Jalisco, Querétaro y Puebla. Los números crecen entre dos y cuatro veces. La meta es 99,9 % de disponibilidad, perder como máximo 15 minutos de datos y volver en 4 horas. Todo lo que no venía en el caso está declarado como supuesto en el informe.">
+<section class="slide" data-notes="<b>Benjamín · 0:45–1:30</b> El caso no dice país, volúmenes ni presupuesto. Por eso los declaramos como supuestos. Elegimos <b>México</b>, porque tiene estados y porque las dos nubes tienen región en Querétaro. Hoy VAR opera en la Ciudad de México. La expansión suma Nuevo León, Jalisco, Querétaro y Puebla. Los números crecen entre dos y cuatro veces. La meta es <b>99,9 %</b> de disponibilidad. Además, perder como máximo <b>15 minutos</b> de datos y volver a operar en <b>4 horas</b>.">
   <div class="kicker rv"><b>01</b> El caso · supuestos declarados</div>
   <h2 class="rv">Hoy un servidor en la CDMX. <em>Mañana, cinco entidades.</em></h2>
   <div class="grid s2" style="grid-template-columns:repeat(4,1fr);margin-top:48px">
@@ -131,7 +131,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 3 · TRES PARES -->
-<section class="slide" data-notes="<b>Francisco · 1:30–2:30</b> Investigamos los seis servicios en la documentación oficial. Cómputo: EC2 y Azure VM son equivalentes, ambos con SLA de 99,99 % si se reparten en zonas. Objetos: S3 y Blob Storage; ojo, para igualar a S3 en Azure hay que elegir redundancia de zona, ZRS. Base de datos: Azure SQL Database es solo SQL Server. Como VAR usa PostgreSQL, el par justo es RDS for PostgreSQL contra Azure Database for PostgreSQL Flexible Server, como permite el enunciado.">
+<section class="slide" data-notes="<b>Francisco · 1:30–2:30</b> Investigamos los seis servicios en la documentación oficial. En cómputo, EC2 y Azure VM son equivalentes. Los dos ofrecen <b>99,99 %</b> si las máquinas están en dos o más zonas. En almacenamiento de objetos comparamos S3 y Blob Storage. Para igualar a S3, en Azure hay que elegir redundancia de zona, que se llama ZRS. En base de datos hay un detalle. Azure SQL Database solo sirve para SQL Server, y VAR usa PostgreSQL. Por eso el par justo es <b>RDS for PostgreSQL</b> contra <b>Azure Database for PostgreSQL</b>, como permite el enunciado.">
   <div class="kicker rv"><b>02</b> Investigación · tres pares de servicios</div>
   <h2 class="rv">Los mismos bloques, <em>con letra chica distinta</em></h2>
   <div class="grid s3" style="grid-template-columns:repeat(3,1fr);margin-top:52px">
@@ -157,7 +157,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 4 · DIFERENCIAS QUE IMPORTAN -->
-<section class="slide" data-notes="<b>Francisco · 2:30–3:30</b> Estas son las diferencias que sí importan para VAR. En disponibilidad de la base gana Azure: 99,99 contra 99,95 %. En crecimiento gana AWS: 15 réplicas de lectura contra 5. Y la diferencia clave: Mexico Central no tiene región pareada, y el respaldo geo-redundante de PostgreSQL en Azure solo funciona en regiones pareadas. En AWS sí se pueden copiar los respaldos a otra región. Eso pesa mucho en continuidad.">
+<section class="slide" data-notes="<b>Francisco · 2:30–3:30</b> Ahora, las tres diferencias que importan para VAR. En disponibilidad de la base gana Azure, con <b>99,99 %</b> contra 99,95 %. En crecimiento gana AWS, con <b>15 réplicas</b> de lectura contra 5. La tercera es la más importante. La región de México en Azure no tiene región pareada, y el respaldo geo-redundante de PostgreSQL solo funciona entre regiones pareadas. En AWS sí podemos copiar los respaldos a otra región. Eso decide la continuidad ante un desastre.">
   <div class="kicker rv"><b>03</b> Matriz 1 · lo que cambia la decisión</div>
   <h2 class="rv">Tres diferencias que <em>sí importan</em> para VAR</h2>
   <table class="m xl rv" style="margin-top:56px">
@@ -170,7 +170,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 5 · COSTOS -->
-<section class="slide" data-notes="<b>Francisco · 3:30–4:45</b> Los costos salen de las calculadoras oficiales de AWS y Azure, configuradas sin iniciar sesión, en las regiones de México, en dólares, el 10 de noviembre, pagando por uso y sin capas gratuitas. Con la misma arquitectura en ambos, AWS cuesta 495 dólares al mes hoy y 1.046 en la expansión; Azure, 565 y 1.189. Azure sale un 14 % más caro, sobre todo por la base de datos con alta disponibilidad y porque cobra por cada VM respaldada. Al año: 5.945 contra 6.777 hoy, y 12.550 contra 14.264 en la expansión. Las estimaciones de AWS tienen enlace público y las de Azure van en capturas, en el anexo C.">
+<section class="slide" data-notes="<b>Francisco · 3:30–4:45</b> Los costos salen de las calculadoras oficiales de AWS y Azure. Las usamos sin iniciar sesión, en las regiones de México, en dólares y pagando por uso. Configuramos la misma arquitectura en los dos proveedores. AWS cuesta <b>495 dólares</b> al mes hoy y <b>1.046</b> en la expansión. Azure cuesta <b>565</b> y <b>1.189</b>. O sea, Azure sale un <b>14 %</b> más caro. La diferencia viene sobre todo de la base de datos con alta disponibilidad, y de que Azure cobra por cada máquina respaldada. Al año son 5.945 contra 6.777 dólares hoy, y 12.550 contra 14.264 en la expansión. Los enlaces de AWS y las capturas de Azure están en el anexo C.">
   <div class="kicker rv"><b>04</b> Matriz 2 · USD por mes · calculadoras oficiales · 10-11-2026</div>
   <h2 class="rv">Pagando por uso, Azure cuesta <em>14 % más</em></h2>
   <div style="display:grid;grid-template-columns:1fr 430px;gap:50px;margin-top:30px;flex:1;align-items:end">
@@ -195,7 +195,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 6 · SENSIBILIDAD -->
-<section class="slide" data-notes="<b>Julián · 4:45–5:30</b> Pero ojo: si VAR reserva por un año el cómputo y la base de datos, Azure descuenta más y la diferencia casi desaparece: 384 contra 391 dólares hoy, menos de 2 %. Además, quedan costos fuera que suman entre 20 y 30 % en ambos: balanceador, VPN, monitoreo, soporte e IVA. Conclusión de costos: el precio no decide. Por eso miramos el resto de los criterios.">
+<section class="slide" data-notes="<b>Julián · 4:45–5:30</b> Pero hay un matiz. Si VAR reserva por un año el cómputo y la base de datos, Azure descuenta más. Ahí la diferencia casi desaparece, con <b>384 contra 391 dólares</b> al mes, menos de un 2 %. Además, en los dos proveedores quedan costos fuera de la matriz, como el balanceador, la VPN, el monitoreo, el soporte y el IVA. Suman entre un <b>20 y un 30 %</b> más. Por eso concluimos que el precio no decide, y miramos el resto de los criterios.">
   <div class="kicker rv"><b>05</b> Sensibilidad · reserva de 1 año</div>
   <h2 class="rv">Con reserva a un año, <em>el precio deja de decidir</em></h2>
   <div class="grid s6" style="grid-template-columns:1fr 1fr;margin-top:56px">
@@ -210,7 +210,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 7 · ARQUITECTURA -->
-<section class="slide" data-notes="<b>Julián · 5:30–6:30</b> Esta es la arquitectura. Todo vive en la región México Central de AWS, en Querétaro. Los usuarios entran por HTTPS a un balanceador con firewall de aplicaciones. Detrás, instancias EC2 en dos zonas, que crecen solas con Auto Scaling. La base es PostgreSQL en RDS con una réplica síncrona en otra zona. Los documentos van a S3 con versionado y bloqueo. Todo se cifra con claves de VAR y los respaldos se copian cada día a una segunda región. En la expansión solo se activa la tercera zona y una réplica de lectura.">
+<section class="slide" data-notes="<b>Julián · 5:30–6:30</b> Esta es la arquitectura que proponemos. Todo vive en la región <b>México Central de AWS</b>, en Querétaro. Los usuarios entran por HTTPS a un balanceador con firewall de aplicaciones. Detrás hay servidores EC2 en dos zonas, que crecen solos con Auto Scaling. La base de datos es PostgreSQL en RDS, con una réplica en otra zona. Los documentos van a S3, con versionado y bloqueo. Todo se cifra con claves de VAR, se entra con SSO y doble factor, y los respaldos se copian cada día a una segunda región. En la expansión solo se activan una tercera zona y una réplica de lectura.">
   <div class="kicker rv"><b>06</b> Arquitectura propuesta · AWS mx-central-1</div>
   <svg class="rv" viewBox="0 0 1408 640" width="1408" height="640" style="margin-top:14px" aria-label="Diagrama de arquitectura">
     <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto"><path d="M0,0 L10,5 L0,10z" fill="#1B2733"/></marker></defs>
@@ -259,7 +259,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 8 · RECOMENDACIÓN -->
-<section class="slide" data-notes="<b>Julián · 6:30–7:30</b> Para decidir ponderamos cinco criterios. Seguridad empata. Costo gana AWS. Disponibilidad de la base gana Azure. Crecimiento y, sobre todo, continuidad ante un desastre regional los gana AWS. Resultado: 4,80 contra 4,30. Recomendamos AWS como proveedor único: con dos personas en TI, mantener dos nubes duplica trabajo sin beneficio. Y la disponibilidad compuesta del camino transaccional es de 99,93 %, sobre la meta.">
+<section class="slide" data-notes="<b>Julián · 6:30–7:30</b> Para decidir ponderamos cinco criterios. En seguridad empatan. En costo gana AWS. En disponibilidad de la base gana Azure. En crecimiento, y sobre todo en continuidad ante un desastre regional, gana AWS. El resultado es <b>4,80 contra 4,30</b>. Por eso recomendamos <b>AWS como proveedor único</b>. VAR tiene solo dos personas en TI, y mantener dos nubes duplicaría el trabajo sin un beneficio claro. Con este diseño, la disponibilidad del sistema completo es de <b>99,93 %</b>, sobre la meta de 99,9.">
   <div class="kicker rv"><b>07</b> Recomendación · matriz ponderada</div>
   <h2 class="rv">Recomendamos <em>AWS</em>, una sola nube</h2>
   <div style="display:grid;grid-template-columns:1fr 360px;gap:60px;margin-top:40px;align-items:center">
@@ -280,7 +280,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 9 · MIGRACIÓN Y CRONOGRAMA -->
-<section class="slide" data-notes="<b>Matías · 7:30–8:30</b> La migración es por etapas y con replicación, no de un golpe. Primero se copian los documentos con DataSync mientras VAR opera. Después, la base se replica con DMS, de modo que la nube va solo segundos atrás. Hacemos un piloto con 20 cuentas y el corte un fin de semana, fuera del cierre de mes, con unos 30 minutos de escrituras congeladas. Validamos conteos de filas y sumas de montos. Son 16 semanas en seis fases, y después se suma un estado por mes.">
+<section class="slide" data-notes="<b>Matías · 7:30–8:30</b> La migración es <b>por etapas</b> y con replicación, no de un golpe. Primero copiamos los documentos con DataSync, mientras VAR sigue operando. Después replicamos la base con DMS, así la nube va solo segundos atrás. Hacemos un <b>piloto con 20 cuentas</b>. El corte final es un fin de semana, fuera del cierre de mes, con unos <b>30 minutos</b> sin poder escribir datos. Validamos contando filas y sumando montos. En total son <b>16 semanas</b> en seis fases. Después se suma un estado por mes.">
   <div class="kicker rv"><b>08</b> Migración y cronograma · 16 semanas</div>
   <h2 class="rv">Por etapas y con replicación, <em>nunca de un golpe</em></h2>
   <svg class="rv" viewBox="0 0 1408 330" width="1408" height="330" style="margin-top:36px" aria-label="Carta Gantt">
@@ -305,7 +305,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 10 · RIESGOS Y CONTINUIDAD -->
-<section class="slide" data-notes="<b>Matías · 8:30–9:30</b> Identificamos ocho riesgos con probabilidad e impacto. El único alto es el acceso indebido, porque en la nube las identidades y los permisos son responsabilidad de VAR: lo mitigamos con SSO, MFA y mínimo privilegio. Para continuidad: una falla de zona se resuelve en uno o dos minutos sin perder datos; una corrupción, con restauración a un punto en el tiempo de menos de 5 minutos. Y si el corte sale mal, tenemos rollback: el servidor actual recibe los cambios durante dos semanas y se vuelve atrás en 2 horas.">
+<section class="slide" data-notes="<b>Matías · 8:30–9:30</b> Identificamos <b>ocho riesgos</b>, con su probabilidad y su impacto. El único alto es el <b>acceso indebido</b>. En la nube, las cuentas y los permisos son responsabilidad de VAR. Lo mitigamos con SSO, doble factor y mínimo privilegio. En continuidad, una falla de zona se resuelve en uno o dos minutos, sin perder datos. Si se corrompen datos, se restauran a un momento anterior, perdiendo menos de 5 minutos. Y si el corte sale mal, hay vuelta atrás. Durante dos semanas el servidor actual sigue recibiendo los cambios, y volver toma <b>2 horas</b>.">
   <div class="kicker rv"><b>09</b> Riesgos y continuidad</div>
   <h2 class="rv">Ocho riesgos, <em>uno alto</em>, y un camino de vuelta</h2>
   <div style="display:grid;grid-template-columns:520px 1fr;gap:56px;margin-top:34px">
@@ -330,7 +330,7 @@ table.m.xl{font-size:30px} table.m.xl td{padding:24px 18px} table.m.xl td.n{font
 </section>
 
 <!-- 11 · CONCLUSIÓN -->
-<section class="slide" data-notes="<b>Benjamín · 9:30–10:00</b> Respondemos la pregunta de cierre: recomendamos AWS en México Central, por 495 dólares al mes hoy y 1.046 en la expansión, con 99,9 %, RPO de 15 minutos y RTO de 4 horas. Cambiaríamos a Azure si VAR usara Microsoft 365 o SQL Server, o si ninguna copia pudiera salir de México. Gracias; quedamos atentos a sus preguntas.">
+<section class="slide" data-notes="<b>Benjamín · 9:30–10:00</b> Respondemos la pregunta de cierre. Recomendamos <b>AWS en México Central</b>, por <b>495 dólares</b> al mes hoy y <b>1.046</b> en la expansión. Cumple la meta de 99,9 % de disponibilidad, con un máximo de 15 minutos de datos perdidos y 4 horas para volver a operar. Cambiaríamos a Azure solo si VAR usara Microsoft 365 o SQL Server, o si ninguna copia pudiera salir de México. Muchas gracias. Quedamos atentos a sus preguntas.">
   <div class="kicker rv"><b>10</b> Pregunta de cierre</div>
   <h2 class="rv" style="font-size:62px">Hoy y en cuatro estados: <em>AWS en México Central</em></h2>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:44px">
